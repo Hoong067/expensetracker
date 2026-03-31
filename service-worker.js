@@ -128,14 +128,5 @@ self.addEventListener('fetch', event => {
   }
 });
 
-// Handle messages from client for test notifications
-self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'SEND_TEST_NOTIFICATION') {
-    self.registration.showNotification(event.data.title, {
-      body: event.data.body,
-      icon: event.data.icon || '/icons/icon-192.png',
-      badge: event.data.icon || '/icons/icon-192.png',
-      tag: 'test-notification'
-    });
-  }
-});
+// Notifications now come from backend Web Push - no client-side message handling needed
+

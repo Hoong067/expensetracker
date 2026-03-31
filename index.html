@@ -4471,6 +4471,28 @@ function requestNotificationPermission() {
 
 let notificationInterval = null;
 let notificationCount = 0;
+const BACKEND_URL = 'http://localhost:8080';
+
+function requestNotificationPermission() {
+  if (!('Notification' in window)) {
+    console.log('Browser does not support notifications');
+    return;
+  }
+  
+  if (Notification.permission === 'granted') {
+    subscribeToPushNotifications();
+    return;
+  }
+  
+  if (Notification.permission !== 'denied') {
+    Notification.requestPermission().then(permission => {
+      if (permission === 'granted') {
+        console.log('Notification permission granted');
+        subscribeToPushNotifications();
+      }
+    });
+  }
+}
 
 function subscribeToPushNotifications() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
@@ -4490,45 +4512,61 @@ function subscribeToPushNotifications() {
         }).then(subscription => {
           console.log('Push subscription successful:', subscription);
           localStorage.setItem('pushSubscription', JSON.stringify(subscription));
-          startAutomaticNotifications(registration);
+          // Send subscription to backend
+          sendSubscriptionToBackend(subscription);
+          startAutomaticReminders();
         }).catch(err => {
           console.log('Push subscription failed:', err);
         });
       } else {
         console.log('Already subscribed to push notifications');
-        startAutomaticNotifications(registration);
+        // Send to backend in case it's not stored
+        sendSubscriptionToBackend(subscription);
+        startAutomaticReminders();
       }
     });
   });
 }
 
-function startAutomaticNotifications(registration) {
+function sendSubscriptionToBackend(subscription) {
+  fetch(`${BACKEND_URL}/api/subscribe`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(subscription)
+  })
+    .then(res => res.json())
+    .then(data => {
+      console.log('Subscription sent to backend:', data);
+      showToast('✅ Notifications enabled! You will get reminders every 5 seconds.', 'success');
+    })
+    .catch(err => {
+      console.error('Failed to send subscription to backend:', err);
+      showToast('⚠ Failed to enable backend notifications. Check backend server.', 'warning');
+    });
+}
+
+function startAutomaticReminders() {
   // Stop existing interval if any
   if (notificationInterval) {
     clearInterval(notificationInterval);
   }
   
-  notificationCount = 0;
-  
-  // Send first notification immediately
-  sendReminder(registration);
-  
-  // Then send every 5 seconds non-stop
+  // Call backend to send reminders every 5 seconds
   notificationInterval = setInterval(() => {
-    sendReminder(registration);
+    fetch(`${BACKEND_URL}/api/send-reminder`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (!data.success) {
+          console.log('Reminder not sent');
+        }
+      })
+      .catch(err => console.error('Error sending reminder:', err));
   }, 5000);
   
-  console.log('Automatic notifications started - sending every 5 seconds');
-}
-
-function sendReminder(registration) {
-  notificationCount++;
-  navigator.serviceWorker.controller.postMessage({
-    type: 'SEND_TEST_NOTIFICATION',
-    title: `💰 Save Your Expense #${notificationCount}`,
-    body: `Don't forget to record your expense! Reminder #${notificationCount}`,
-    icon: '/icons/icon-192.png'
-  });
+  console.log('Automatic reminders started - sending every 5 seconds to backend');
 }
 
 function urlBase64ToUint8Array(base64String) {
@@ -4550,9 +4588,9 @@ let testNotificationInterval = null;
 let testNotificationCount = 0;
 
 function sendTestNotification() {
-  // This function is no longer needed - notifications are sent automatically
-  // You can leave this empty or remove the button from the UI
+  // This function is no longer needed - notifications come from backend
 }
+
 
 
 function sendBudgetAlert(budgetExceeded) {
