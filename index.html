@@ -51,13 +51,17 @@ html {
   --radius-lg: 18px;
   --shadow: 0 12px 28px rgba(2, 6, 23, 0.42);
   --shadow-md: 0 20px 40px rgba(2, 6, 23, 0.55);
+  --font-display: 'Fraunces', serif;
+  --font-body: 'DM Mono', monospace;
+  --ease-out: cubic-bezier(.2,.75,.25,1);
 }
 
 body {
   min-height: 100vh;
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-body);
   color: var(--text);
   line-height: 1.55;
+  letter-spacing: 0.01em;
   background:
     radial-gradient(120% 140% at 10% -20%, #16213a 0%, rgba(22, 33, 58, 0) 45%),
     radial-gradient(120% 140% at 90% -30%, #1a1a2f 0%, rgba(26, 26, 47, 0) 45%),
@@ -223,11 +227,37 @@ body {
 /* ===== PAGES ===== */
 .page {
   display: none;
-  padding: 14px;
+  padding: 16px 14px 26px;
+  opacity: 0;
+  transform: translateY(10px) scale(0.995);
 }
 
 .page.active {
   display: block;
+  opacity: 1;
+  transform: none;
+}
+
+.page.active.is-entering {
+  animation: pageIn 0.34s var(--ease-out);
+}
+
+.page.is-exiting {
+  display: block;
+  opacity: 0;
+  transform: translateY(6px) scale(0.99);
+  pointer-events: none;
+}
+
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .page-header {
@@ -239,16 +269,133 @@ body {
 }
 
 .page-h {
-  font-family: 'Fraunces', serif;
-  font-size: 23px;
+  font-family: var(--font-display);
+  font-size: 25px;
   font-weight: 600;
   color: #f8fafc;
-  letter-spacing: -0.4px;
+  letter-spacing: -0.35px;
 }
 
 .page-sub {
-  font-size: 11px;
+  font-size: 11.5px;
   color: var(--muted);
+}
+
+/* ===== DASHBOARD HERO ===== */
+.dashboard-hero {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(79, 140, 255, 0.28);
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 12px;
+  background:
+    radial-gradient(90% 90% at 90% 0%, rgba(79, 140, 255, 0.32) 0%, rgba(79, 140, 255, 0) 55%),
+    linear-gradient(160deg, #151b2a 0%, #101621 100%);
+  box-shadow: var(--shadow);
+}
+
+.dashboard-hero::after {
+  content: '';
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  right: -30px;
+  bottom: -58px;
+  border-radius: 50%;
+  background: rgba(99, 179, 237, 0.14);
+  filter: blur(2px);
+}
+
+.hero-kicker {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  color: #9fb8de;
+  margin-bottom: 10px;
+}
+
+.hero-main {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.hero-headline {
+  font-size: 12px;
+  color: #b8cae8;
+  margin-bottom: 2px;
+}
+
+.hero-value {
+  font-family: var(--font-display);
+  font-size: 32px;
+  line-height: 1;
+  letter-spacing: -0.6px;
+  color: #f8fbff;
+}
+
+.hero-meta {
+  position: relative;
+  z-index: 1;
+  margin-top: 8px;
+  color: #c8d8f2;
+  font-size: 11px;
+}
+
+.hero-pill {
+  border: 1px solid rgba(179, 225, 209, 0.4);
+  border-radius: 999px;
+  font-size: 10px;
+  color: #d1fae5;
+  background: rgba(16, 185, 129, 0.14);
+  padding: 5px 10px;
+  white-space: nowrap;
+}
+
+.hero-pill.warn {
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #fde68a;
+  background: rgba(245, 158, 11, 0.15);
+}
+
+.hero-pill.over {
+  border-color: rgba(239, 68, 68, 0.55);
+  color: #fecaca;
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.hero-mini {
+  position: relative;
+  z-index: 1;
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.hero-mini-item {
+  border: 1px solid rgba(79, 140, 255, 0.24);
+  border-radius: 12px;
+  background: rgba(8, 13, 21, 0.5);
+  padding: 10px;
+}
+
+.hero-mini-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+  color: #9fb8de;
+  margin-bottom: 4px;
+}
+
+.hero-mini-value {
+  font-size: 14px;
+  color: #e2ebfb;
+  font-weight: 500;
 }
 
 /* ===== SUMMARY ===== */
@@ -256,7 +403,7 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  margin-bottom: 14px;
+  margin: 12px 0 14px;
 }
 
 .summary-card {
@@ -265,6 +412,12 @@ body {
   background: linear-gradient(160deg, #121723 0%, #0e131d 100%);
   box-shadow: var(--shadow);
   padding: 14px;
+  transition: transform 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border2);
 }
 
 .sc-label {
@@ -276,7 +429,7 @@ body {
 }
 
 .sc-value {
-  font-size: 19px;
+  font-size: 21px;
   font-weight: 500;
   line-height: 1.1;
   color: var(--text);
@@ -300,12 +453,35 @@ body {
   margin-bottom: 14px;
 }
 
+.dashboard-charts {
+  margin-top: 4px;
+}
+
 .chart-card {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: linear-gradient(180deg, #121723 0%, #0f1520 100%);
   box-shadow: var(--shadow);
   padding: 14px;
+  opacity: 0;
+  transform: translateY(14px) scale(0.992);
+  transition: opacity 0.45s var(--ease-out), transform 0.45s var(--ease-out);
+}
+
+.chart-card.revealed {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.chart-card canvas {
+  opacity: 0.3;
+  transform: translateY(7px) scale(0.99);
+  transition: opacity 0.45s var(--ease-out), transform 0.45s var(--ease-out);
+}
+
+.chart-card.revealed canvas {
+  opacity: 1;
+  transform: none;
 }
 
 .chart-card-title {
@@ -758,53 +934,82 @@ body {
 .mobile-tabbar {
   position: fixed;
   left: 50%;
-  bottom: max(8px, env(safe-area-inset-bottom));
+  bottom: max(10px, env(safe-area-inset-bottom));
   transform: translateX(-50%);
-  width: calc(100% - 16px);
+  width: calc(100% - 20px);
   max-width: 462px;
   z-index: 50;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 4px;
+  gap: 6px;
   padding: 6px;
-  border-radius: 18px;
+  border-radius: 20px;
   border: 1px solid rgba(79, 140, 255, 0.25);
-  background: rgba(12, 16, 24, 0.95);
+  background: rgba(11, 15, 24, 0.9);
+  backdrop-filter: blur(16px);
   box-shadow: var(--shadow);
+  --active-index: 0;
 }
 
-.nav-item {
+.mobile-tab-indicator {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: calc(6px + (var(--active-index) * ((100% - 12px) / 5)));
+  width: calc((100% - 12px) / 5);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #66a3ff 0%, #4f8cff 100%);
+  box-shadow: 0 10px 20px rgba(79, 140, 255, 0.33);
+  transition: left 0.35s var(--ease-out), width 0.35s var(--ease-out);
+  pointer-events: none;
+}
+
+.mobile-tabbar .nav-item {
   width: 100%;
   border: none;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 3px;
   border-radius: 12px;
-  padding: 8px 4px;
+  padding: 8px 4px 7px;
   font-size: 10px;
-  font-family: 'DM Mono', monospace;
-  transition: all 0.2s ease;
+  font-family: var(--font-body);
+  transition: color 0.22s ease, transform 0.14s ease;
 }
 
-.nav-item .icon {
+.mobile-tabbar .nav-item .icon {
   width: auto;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1;
+  transition: transform 0.2s ease;
 }
 
-.nav-item:hover {
-  background: rgba(79, 140, 255, 0.12);
-  color: #dbeafe;
+.mobile-tabbar .nav-item .label {
+  font-size: 9px;
+  letter-spacing: 0.3px;
 }
 
-.nav-item.active {
-  background: linear-gradient(180deg, #66a3ff 0%, #4f8cff 100%);
+.mobile-tabbar .nav-item:hover {
+  color: #e2ebfb;
+}
+
+.mobile-tabbar .nav-item:active {
+  transform: scale(0.94);
+}
+
+.mobile-tabbar .nav-item.active {
   color: #f8fbff;
+}
+
+.mobile-tabbar .nav-item.active .icon {
+  transform: translateY(-1px) scale(1.04);
 }
 
 .no-script {
@@ -827,6 +1032,29 @@ body {
     min-height: calc(100dvh - 36px);
     border-radius: 24px;
     overflow: hidden;
+  }
+}
+
+@media (min-width: 420px) {
+  .dashboard-charts {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dashboard-charts .chart-card:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page,
+  .page.active.is-entering,
+  .summary-card,
+  .chart-card,
+  .chart-card canvas,
+  .mobile-tabbar .nav-item,
+  .mobile-tab-indicator {
+    animation: none !important;
+    transition: none !important;
   }
 }
 
@@ -915,7 +1143,42 @@ body {
       <div class="page-header">
         <div>
           <div class="page-h">Dashboard</div>
-          <div class="page-sub" id="dashSub">Overview for this month</div>
+          <div class="page-sub" id="dashSub">Spending pulse for this month</div>
+        </div>
+      </div>
+
+      <div class="dashboard-hero">
+        <div class="hero-kicker">month snapshot</div>
+        <div class="hero-main">
+          <div>
+            <div class="hero-headline">Spent so far</div>
+            <div class="hero-value" id="dashSpentBig">RM 0.00</div>
+          </div>
+          <div class="hero-pill safe" id="dashBudgetPill">0% of budget</div>
+        </div>
+        <div class="hero-meta" id="dashHeroMeta">Budget RM 0 · Remaining RM 0</div>
+        <div class="hero-mini">
+          <div class="hero-mini-item">
+            <div class="hero-mini-label">transactions</div>
+            <div class="hero-mini-value" id="dashTxCount">0</div>
+          </div>
+          <div class="hero-mini-item">
+            <div class="hero-mini-label">daily pace</div>
+            <div class="hero-mini-value" id="dashDailyPace">RM 0.00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-grid dashboard-charts">
+        <div class="chart-card">
+          <div class="chart-card-title">spending by category</div>
+          <div class="chart-wrap"><canvas id="donutChart"></canvas></div>
+          <div class="legend" id="donutLegend"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-title">monthly trend — last 6 months</div>
+          <div class="chart-wrap" style="height:210px"><canvas id="trendChart"></canvas></div>
         </div>
       </div>
 
@@ -940,19 +1203,6 @@ body {
           <div class="sc-label">Daily Average</div>
           <div class="sc-value amber" id="cardAvg">RM 0</div>
           <div class="sc-sub" id="cardAvgSub">this month</div>
-        </div>
-      </div>
-
-      <!-- Charts -->
-      <div class="charts-grid">
-        <div class="chart-card">
-          <div class="chart-card-title">spending by category</div>
-          <div class="chart-wrap"><canvas id="donutChart"></canvas></div>
-          <div class="legend" id="donutLegend"></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-card-title">monthly trend — last 6 months</div>
-          <div class="chart-wrap" style="height:210px"><canvas id="trendChart"></canvas></div>
         </div>
       </div>
 
@@ -1224,25 +1474,26 @@ body {
   </div><!-- end main -->
 
   <nav class="mobile-tabbar" aria-label="Primary Navigation">
+    <span class="mobile-tab-indicator" aria-hidden="true"></span>
     <button class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
-      <span class="icon">◈</span>
-      <span>Home</span>
+      <span class="icon">⌂</span>
+      <span class="label">Home</span>
     </button>
     <button class="nav-item" data-page="add" onclick="showPage('add')">
-      <span class="icon">+</span>
-      <span>Add</span>
+      <span class="icon">＋</span>
+      <span class="label">Add</span>
     </button>
     <button class="nav-item" data-page="transactions" onclick="showPage('transactions')">
-      <span class="icon">≡</span>
-      <span>List</span>
+      <span class="icon">☰</span>
+      <span class="label">Ledger</span>
     </button>
     <button class="nav-item" data-page="analytics" onclick="showPage('analytics')">
-      <span class="icon">◑</span>
-      <span>Stats</span>
+      <span class="icon">◔</span>
+      <span class="label">Stats</span>
     </button>
     <button class="nav-item" data-page="settings" onclick="showPage('settings')">
       <span class="icon">⚙</span>
-      <span>Settings</span>
+      <span class="label">Settings</span>
     </button>
   </nav>
 </div><!-- end app-wrap -->
@@ -1402,6 +1653,7 @@ let currentMonth = new Date().getMonth();
 let currentYear  = new Date().getFullYear();
 let donutChart, trendChart, catBarChart, dailyChart, yearChart;
 let currentPage  = 'dashboard';
+let tabResizeBound = false;
 
 // ===== HELPERS =====
 function uid() {
@@ -1433,17 +1685,52 @@ function getMonthExpenses(y=currentYear, m=currentMonth) {
   });
 }
 
+function setActiveTabIndicator(page) {
+  const tabbar = document.querySelector('.mobile-tabbar');
+  if (!tabbar) return;
+  const tabs = Array.from(tabbar.querySelectorAll('.nav-item[data-page]'));
+  const idx = tabs.findIndex(tab => tab.dataset.page === page);
+  if (idx >= 0) tabbar.style.setProperty('--active-index', String(idx));
+}
+
+function animatePageEntrance(pageEl) {
+  pageEl.classList.remove('is-entering');
+  // Force reflow so animation restarts on every page switch.
+  void pageEl.offsetWidth;
+  pageEl.classList.add('is-entering');
+}
+
+function revealCharts(scopeId) {
+  const scope = document.getElementById(scopeId);
+  if (!scope) return;
+  const cards = scope.querySelectorAll('.chart-card');
+  cards.forEach((card, idx) => {
+    card.classList.remove('revealed');
+    window.setTimeout(() => card.classList.add('revealed'), 20 + Math.min(idx * 75, 260));
+  });
+}
+
 // ===== NAVIGATION =====
 function showPage(page) {
   const target = document.getElementById('page-' + page);
   if (!target) return;
 
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const current = document.getElementById('page-' + currentPage);
+  if (current && current !== target) {
+    current.classList.remove('active', 'is-exiting', 'is-entering');
+  }
+
+  document.querySelectorAll('.page').forEach(p => {
+    if (p !== target) p.classList.remove('active', 'is-exiting', 'is-entering');
+  });
+
   target.classList.add('active');
+  animatePageEntrance(target);
 
   document.querySelectorAll('.nav-item[data-page]').forEach(n => {
     n.classList.toggle('active', n.dataset.page === page);
   });
+  setActiveTabIndicator(page);
 
   currentPage = page;
   if (page === 'dashboard') renderDashboard();
@@ -1467,7 +1754,7 @@ function changeMonth(dir) {
 function updateMonthLabel() {
   const label = MONTHS[currentMonth] + ' ' + currentYear;
   document.getElementById('monthLabel').textContent = label;
-  document.getElementById('dashSub').textContent = 'Overview for ' + label;
+  document.getElementById('dashSub').textContent = 'Spending pulse for ' + label;
   document.getElementById('txSub').textContent = 'All expenses for ' + label;
   document.getElementById('txMonthLabel').textContent = label;
   document.getElementById('analyticsSub').textContent = 'Spending insights — ' + label;
@@ -1504,22 +1791,33 @@ function renderDashboard() {
   const pct = budget > 0 ? ((spent / budget) * 100) : 0;
   const daysInMonth = new Date(currentYear, currentMonth+1, 0).getDate();
   const avgDaily = spent / daysInMonth;
+  const largest = list.length ? Math.max(...list.map(e => e.amount)) : 0;
+
+  // Hero
+  document.getElementById('dashSpentBig').textContent = fmt(spent);
+  document.getElementById('dashTxCount').textContent = String(list.length);
+  document.getElementById('dashDailyPace').textContent = fmt(avgDaily);
+  document.getElementById('dashHeroMeta').textContent = 'Budget ' + fmt(budget, 0) + ' · Remaining ' + fmt(Math.abs(remain)) + (remain < 0 ? ' over budget' : '');
+  const pill = document.getElementById('dashBudgetPill');
+  pill.textContent = budget > 0 ? pct.toFixed(1) + '% of budget' : 'No budget set';
+  pill.className = 'hero-pill ' + (pct >= 100 ? 'over' : pct >= 80 ? 'warn' : 'safe');
 
   // Cards
   document.getElementById('cardTotal').textContent = fmt(spent);
-  document.getElementById('cardTotalSub').textContent = list.length + ' transaction' + (list.length===1?'':'s');
+  document.getElementById('cardTotalSub').textContent = list.length + ' transaction' + (list.length===1?'':'s') + ' logged';
   document.getElementById('cardBudget').textContent = fmt(budget, 0);
-  document.getElementById('cardBudgetSub').textContent = 'click settings to edit';
+  document.getElementById('cardBudgetSub').textContent = largest ? 'largest expense ' + fmt(largest) : 'click settings to edit';
   const remEl = document.getElementById('cardRemain');
   remEl.textContent = fmt(Math.abs(remain));
   remEl.className = 'sc-value ' + (remain < 0 ? 'red' : remain < budget * 0.2 ? 'amber' : 'green');
-  document.getElementById('cardRemainSub').textContent = pct.toFixed(1) + '% of budget used' + (remain < 0 ? ' — OVER!' : '');
+  document.getElementById('cardRemainSub').textContent = pct.toFixed(1) + '% of budget used' + (remain < 0 ? ' — over budget' : '');
   document.getElementById('cardAvg').textContent = fmt(avgDaily);
   document.getElementById('cardAvgSub').textContent = 'per day (' + daysInMonth + ' days in month)';
 
   renderDonut(list);
   renderTrend();
   renderRecent(list);
+  revealCharts('page-dashboard');
 }
 
 function renderDonut(list) {
@@ -1805,6 +2103,8 @@ function renderAnalytics() {
       }
     }
   });
+
+  revealCharts('page-analytics');
 }
 
 // ===== SETTINGS =====
@@ -2086,6 +2386,14 @@ function init() {
   updateSidebar();
   updateStorageStatusLine();
   renderDashboard();
+  setActiveTabIndicator(currentPage);
+  const pageEl = document.getElementById('page-' + currentPage);
+  if (pageEl) animatePageEntrance(pageEl);
+
+  if (!tabResizeBound) {
+    window.addEventListener('resize', () => setActiveTabIndicator(currentPage));
+    tabResizeBound = true;
+  }
 
   if (!storageAvailable) {
     showToast('localStorage is unavailable. Data may not persist after reload.', 'error');
