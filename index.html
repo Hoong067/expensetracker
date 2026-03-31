@@ -2391,11 +2391,10 @@ a:focus-visible {
         <div class="setting-row">
           <div class="setting-info">
             <div class="setting-label">Notification Permission</div>
-            <div class="setting-desc">Enable budget alerts and notifications. Works on desktop and iOS PWAs when app is open or closed.</div>
+            <div class="setting-desc">Enable budget alerts and expense reminders. Once enabled, notifications are sent automatically every 5 seconds (works even when app is closed).</div>
           </div>
           <div class="setting-control" style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn btn-primary btn-sm" id="requestNotifBtn" onclick="requestNotificationPermission()">Enable Notifications</button>
-            <button class="btn btn-sm" id="testNotifBtn" onclick="sendTestNotification()">📬 Test</button>
           </div>
         </div>
       </div>
@@ -4470,6 +4469,9 @@ function requestNotificationPermission() {
   }
 }
 
+let notificationInterval = null;
+let notificationCount = 0;
+
 function subscribeToPushNotifications() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
     console.log('Push notifications not supported');
@@ -4488,13 +4490,44 @@ function subscribeToPushNotifications() {
         }).then(subscription => {
           console.log('Push subscription successful:', subscription);
           localStorage.setItem('pushSubscription', JSON.stringify(subscription));
+          startAutomaticNotifications(registration);
         }).catch(err => {
           console.log('Push subscription failed:', err);
         });
       } else {
         console.log('Already subscribed to push notifications');
+        startAutomaticNotifications(registration);
       }
     });
+  });
+}
+
+function startAutomaticNotifications(registration) {
+  // Stop existing interval if any
+  if (notificationInterval) {
+    clearInterval(notificationInterval);
+  }
+  
+  notificationCount = 0;
+  
+  // Send first notification immediately
+  sendReminder(registration);
+  
+  // Then send every 5 seconds non-stop
+  notificationInterval = setInterval(() => {
+    sendReminder(registration);
+  }, 5000);
+  
+  console.log('Automatic notifications started - sending every 5 seconds');
+}
+
+function sendReminder(registration) {
+  notificationCount++;
+  navigator.serviceWorker.controller.postMessage({
+    type: 'SEND_TEST_NOTIFICATION',
+    title: `💰 Save Your Expense #${notificationCount}`,
+    body: `Don't forget to record your expense! Reminder #${notificationCount}`,
+    icon: '/icons/icon-192.png'
   });
 }
 
@@ -4517,59 +4550,10 @@ let testNotificationInterval = null;
 let testNotificationCount = 0;
 
 function sendTestNotification() {
-  if (!('serviceWorker' in navigator)) {
-    showToast('Service Worker not available', 'error');
-    return;
-  }
-  
-  // Stop if already running
-  if (testNotificationInterval) {
-    clearInterval(testNotificationInterval);
-    testNotificationInterval = null;
-    testNotificationCount = 0;
-    showToast('Reminder notifications stopped', 'success');
-    return;
-  }
-  
-  navigator.serviceWorker.ready.then(registration => {
-    registration.pushManager.getSubscription().then(subscription => {
-      if (!subscription) {
-        showToast('Not subscribed to notifications. Please enable notifications first.', 'warning');
-        return;
-      }
-      
-      testNotificationCount = 0;
-      
-      // Send first notification immediately
-      const sendReminder = () => {
-        testNotificationCount++;
-        navigator.serviceWorker.controller.postMessage({
-          type: 'SEND_TEST_NOTIFICATION',
-          title: `💰 Save Expense Reminder #${testNotificationCount}`,
-          body: `Don't forget to save your expense! You've received ${testNotificationCount} reminder${testNotificationCount > 1 ? 's' : ''}.`,
-          icon: '/icons/icon-192.png'
-        });
-      };
-      
-      // Send first one immediately
-      sendReminder();
-      showToast('Reminder notifications started! (Click test again to stop)', 'success');
-      
-      // Then send every 5 seconds
-      testNotificationInterval = setInterval(sendReminder, 5000);
-      
-      // Auto stop after 1 minute (12 reminders)
-      setTimeout(() => {
-        if (testNotificationInterval) {
-          clearInterval(testNotificationInterval);
-          testNotificationInterval = null;
-          testNotificationCount = 0;
-          showToast('Reminder notifications stopped after 1 minute', '');
-        }
-      }, 60000);
-    });
-  });
+  // This function is no longer needed - notifications are sent automatically
+  // You can leave this empty or remove the button from the UI
 }
+
 
 function sendBudgetAlert(budgetExceeded) {
   if (!('Notification' in window) || Notification.permission !== 'granted') {
