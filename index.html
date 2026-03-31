@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Ledger — Expense Tracker</title>
 <meta name="description" content="A clean, private expense tracker. All data stored locally in your browser.">
 <meta name="theme-color" content="#07080c">
@@ -3493,6 +3493,20 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight') changeMonth(1);
   if (e.key === 'Escape') closeModal();
 });
+
+// ===== TOUCH ZOOM LOCK =====
+let lastTouchEnd = 0;
+document.addEventListener('touchend', e => {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) {
+    e.preventDefault();
+  }
+  lastTouchEnd = now;
+}, { passive: false });
+
+document.addEventListener('gesturestart', e => e.preventDefault(), { passive: false });
+document.addEventListener('gesturechange', e => e.preventDefault(), { passive: false });
+document.addEventListener('gestureend', e => e.preventDefault(), { passive: false });
 
 // ===== PWA =====
 function showUpdateBanner(registration) {
