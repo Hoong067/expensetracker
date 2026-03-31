@@ -955,6 +955,19 @@ a:focus-visible {
   color: #cbd5e1;
 }
 
+.edited-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  margin-left: 6px;
+  padding: 2px 8px;
+  font-size: 10px;
+  letter-spacing: 0.25px;
+  border: 1px solid rgba(16, 185, 129, 0.55);
+  background: rgba(16, 185, 129, 0.16);
+  color: #ccfbf1;
+}
+
 .divider {
   height: 1px;
   background: var(--border);
@@ -1774,9 +1787,11 @@ a:focus-visible {
             <div class="setting-label">Export all data</div>
             <div class="setting-desc">Download a full JSON backup of all your expenses and settings</div>
           </div>
-          <div class="setting-control">
+          <div class="setting-control" style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn btn-sm" onclick="exportJSON()">↓ Export JSON</button>
+            <button class="btn btn-sm" onclick="createSnapshotBackup()">⚡ Quick Snapshot</button>
           </div>
+          <div class="storage-status-line" id="snapshotMeta">No snapshot created yet.</div>
         </div>
         <div class="divider"></div>
         <div class="setting-row">
@@ -1894,6 +1909,7 @@ a:focus-visible {
 
 // ===== DATA STORAGE =====
 const STORAGE_KEY = 'ledger_v1';
+const SNAPSHOT_META_KEY = 'ledger_last_snapshot_at';
 
 const DEFAULT_CATEGORIES = [
   { id:'food',     name:'Food',          color:'#f97316', icon:'🍜' },
@@ -2041,6 +2057,8 @@ let tabResizeBound = false;
 let editingExpenseId = null;
 let pendingDeletedExpense = null;
 let undoDeleteTimer = null;
+let lastEditedExpenseId = null;
+let editedBadgeTimer = null;
 let swRegistration = null;
 
 // ===== HELPERS =====
@@ -2428,11 +2446,13 @@ function renderRecent(list) {
 
 function renderExpenseRow(e) {
   const cat = getCatByName(e.category);
+  const recurringBadge = e.recurringInstance ? '<span class="recurring-chip" style="margin-left:6px">Recurring</span>' : '';
+  const editedBadge = e.id === lastEditedExpenseId ? '<span class="edited-chip">Updated</span>' : '';
   return `<tr>
     <td style="color:var(--muted);font-size:12px">${fmtDate(e.date)}</td>
     <td>
       <span style="font-size:13px">${escHtml(e.description)}</span>
-      ${e.recurringInstance ? '<span class="recurring-chip" style="margin-left:6px">Recurring</span>' : ''}
+      ${recurringBadge}${editedBadge}
     </td>
     <td><span class="cat-badge"><span style="font-size:13px">${cat.icon}</span>${escHtml(e.category)}</span></td>
     <td style="font-size:11px;color:var(--muted)">${escHtml(e.payment||'')}</td>
@@ -2522,6 +2542,8 @@ function addExpense() {
   if (isNaN(amt) || amt <= 0) { showToast('Please enter a valid amount.', 'error'); return; }
   if (!date)       { showToast('Please select a date.', 'error'); return; }
 
+  const editedId = editingExpenseId;
+
   if (editingExpenseId) {
     const target = STATE.expenses.find(e => e.id === editingExpenseId);
     if (!target) {
@@ -2545,9 +2567,12 @@ function addExpense() {
 
   // Reset form
   resetAddForm();
-  const updatedMode = Boolean(editingExpenseId);
+  const updatedMode = Boolean(editedId);
   editingExpenseId = null;
-  if (updatedMode) setAddMode(false);
+  if (updatedMode) {
+    setAddMode(false);
+    markExpenseEdited(editedId);
+  }
 
   // Update view to the month of the new expense
   const expDate = new Date(date + 'T00:00:00');
@@ -2557,7 +2582,7 @@ function addExpense() {
   updateSidebar();
 
   showToast((updatedMode ? 'Expense updated! ' : 'Expense added! ') + 'RM ' + amt.toFixed(2) + ' for ' + desc, 'success');
-  setTimeout(() => showPage('dashboard'), 600);
+  setTimeout(() => showPage(updatedMode ? 'transactions' : 'dashboard'), 600);
 }
 
 function startEditExpense(id) {
@@ -2619,6 +2644,17 @@ function clearPendingUndo() {
   }
   const undoEl = document.getElementById('undoToast');
   if (undoEl) undoEl.classList.remove('show');
+}
+
+function markExpenseEdited(expenseId) {
+  lastEditedExpenseId = expenseId;
+  if (editedBadgeTimer) clearTimeout(editedBadgeTimer);
+  editedBadgeTimer = setTimeout(() => {
+    lastEditedExpenseId = null;
+    editedBadgeTimer = null;
+    if (currentPage === 'transactions') renderTransactions();
+    if (currentPage === 'dashboard') renderDashboard();
+  }, 7000);
 }
 
 function undoDeleteExpense() {
@@ -2815,6 +2851,8 @@ function renderRecurringList() {
     return;
   }
 
+  const currentKey = monthKey(currentYear, currentMonth);
+
   el.innerHTML = STATE.recurring.map(r => `
     <div class="settings-list-row">
       <div class="settings-list-head">
@@ -2822,6 +2860,7 @@ function renderRecurringList() {
         <span class="recurring-chip ${r.active ? '' : 'off'}">${r.active ? 'Active' : 'Paused'}</span>
       </div>
       <div class="settings-list-controls">
+        <button class="btn btn-sm" onclick="skipRecurringThisMonth('${r.id}')" ${!r.active || (Array.isArray(r.appliedMonths) && r.appliedMonths.includes(currentKey)) ? 'disabled' : ''}>Skip This Month</button>
         <button class="btn btn-sm" onclick="toggleRecurring('${r.id}')">${r.active ? 'Pause' : 'Resume'}</button>
         <button class="btn btn-sm" onclick="deleteRecurring('${r.id}')">Delete</button>
       </div>
@@ -2871,6 +2910,35 @@ function toggleRecurring(id) {
   renderDashboard();
   if (currentPage === 'transactions') renderTransactions();
   showToast('Recurring template ' + (target.active ? 'resumed.' : 'paused.'), '');
+}
+
+function skipRecurringThisMonth(id) {
+  const target = STATE.recurring.find(r => r.id === id);
+  if (!target || !target.active) return;
+
+  const key = monthKey(currentYear, currentMonth);
+  if (!Array.isArray(target.appliedMonths)) target.appliedMonths = [];
+  if (!target.appliedMonths.includes(key)) target.appliedMonths.push(key);
+
+  const before = STATE.expenses.length;
+  STATE.expenses = STATE.expenses.filter(exp => {
+    if (exp.recurringId !== target.id) return true;
+    const d = new Date(exp.date + 'T00:00:00');
+    return !(d.getFullYear() === currentYear && d.getMonth() === currentMonth);
+  });
+  const removed = before - STATE.expenses.length;
+
+  saveData();
+  updateSidebar();
+  renderDashboard();
+  if (currentPage === 'transactions') renderTransactions();
+  renderRecurringList();
+
+  if (removed > 0) {
+    showToast('Skipped this month and removed ' + removed + ' generated expense' + (removed === 1 ? '' : 's') + '.', '');
+  } else {
+    showToast('Skipped this month for ' + target.description + '.', '');
+  }
 }
 
 function deleteRecurring(id) {
@@ -3020,6 +3088,41 @@ function exportJSON() {
   const json = JSON.stringify(STATE, null, 2);
   download(json, `ledger_backup_${new Date().toISOString().slice(0,10)}.json`, 'application/json');
   showToast('Full backup exported!', 'success');
+}
+
+function updateSnapshotMeta() {
+  const meta = document.getElementById('snapshotMeta');
+  if (!meta) return;
+  if (!storageAvailable) {
+    meta.textContent = 'Snapshot history unavailable: storage access is blocked.';
+    return;
+  }
+  const stored = localStorage.getItem(SNAPSHOT_META_KEY);
+  if (!stored) {
+    meta.textContent = 'No snapshot created yet.';
+    return;
+  }
+  const d = new Date(stored);
+  meta.textContent = 'Last snapshot: ' + (Number.isNaN(d.getTime()) ? stored : d.toLocaleString('en-MY'));
+}
+
+function createSnapshotBackup() {
+  const now = new Date();
+  const stamp = now.toISOString().replace(/[:]/g, '-').replace('T', '_').slice(0, 19);
+  const payload = {
+    snapshotAt: now.toISOString(),
+    monthContext: monthKey(currentYear, currentMonth),
+    data: STATE
+  };
+  download(JSON.stringify(payload, null, 2), `ledger_snapshot_${stamp}.json`, 'application/json');
+
+  if (storageAvailable) {
+    try {
+      localStorage.setItem(SNAPSHOT_META_KEY, now.toISOString());
+    } catch (_) {}
+  }
+  updateSnapshotMeta();
+  showToast('Snapshot backup created.', 'success');
 }
 
 function importJSON(event) {
@@ -3181,6 +3284,7 @@ function init() {
   populateCatFilters();
   populateAddCatSelect();
   applyRecurringForMonth(currentYear, currentMonth, true);
+  updateSnapshotMeta();
   updateMonthLabel();
   updateSidebar();
   updateStorageStatusLine();
