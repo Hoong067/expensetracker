@@ -209,6 +209,12 @@ body {
   background: #1b2330;
 }
 
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: saturate(0.7);
+}
+
 .btn-primary {
   background: linear-gradient(180deg, #66a3ff 0%, #4f8cff 100%);
   border-color: #4f8cff;
@@ -966,6 +972,61 @@ a:focus-visible {
   border: 1px solid rgba(16, 185, 129, 0.55);
   background: rgba(16, 185, 129, 0.16);
   color: #ccfbf1;
+}
+
+.backup-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.backup-item {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #0d1118;
+  padding: 10px;
+}
+
+.backup-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.backup-item-title {
+  font-size: 12px;
+  color: #e2e8f0;
+}
+
+.backup-item-meta {
+  margin-top: 4px;
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+.backup-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.14);
+}
+
+.backup-chip.auto {
+  border-color: rgba(96, 165, 250, 0.5);
+  color: #bfdbfe;
+  background: rgba(96, 165, 250, 0.2);
+}
+
+.backup-item-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 9px;
+  flex-wrap: wrap;
 }
 
 .divider {
@@ -1789,9 +1850,21 @@ a:focus-visible {
           </div>
           <div class="setting-control" style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn btn-sm" onclick="exportJSON()">↓ Export JSON</button>
-            <button class="btn btn-sm" onclick="createSnapshotBackup()">⚡ Quick Snapshot</button>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Backup Center</div>
+            <div class="setting-desc">Rolling local snapshots (max 10). Restore, download, or delete any snapshot.</div>
+          </div>
+          <div class="setting-control" style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-sm" onclick="createLocalSnapshot()">+ Local Snapshot</button>
+            <button class="btn btn-sm" onclick="createSnapshotBackup()">↓ Snapshot File</button>
+            <button class="btn btn-sm" onclick="clearSnapshotHistory()">Clear History</button>
           </div>
           <div class="storage-status-line" id="snapshotMeta">No snapshot created yet.</div>
+          <div class="backup-list" id="backupList"></div>
         </div>
         <div class="divider"></div>
         <div class="setting-row">
@@ -1910,6 +1983,8 @@ a:focus-visible {
 // ===== DATA STORAGE =====
 const STORAGE_KEY = 'ledger_v1';
 const SNAPSHOT_META_KEY = 'ledger_last_snapshot_at';
+const SNAPSHOTS_KEY = 'ledger_snapshots_v1';
+const MAX_LOCAL_SNAPSHOTS = 10;
 
 const DEFAULT_CATEGORIES = [
   { id:'food',     name:'Food',          color:'#f97316', icon:'🍜' },
@@ -2028,7 +2103,7 @@ function getDefaultData() {
   };
 }
 
-function saveData() {
+function saveData(reason='Changes saved', skipAutoSnapshot=false) {
   if (!storageAvailable) {
     if (!storageWarningShown) {
       showToast('Storage unavailable in this browser mode. Data may reset on refresh.', 'error');
@@ -2041,6 +2116,7 @@ function saveData() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE));
     updateStorageBar();
+    if (!skipAutoSnapshot) queueAutoSnapshot(reason);
   } catch(e) {
     showToast('Storage full! Please export and clear some data.', 'error');
   }
@@ -2060,6 +2136,9 @@ let undoDeleteTimer = null;
 let lastEditedExpenseId = null;
 let editedBadgeTimer = null;
 let swRegistration = null;
+let autoSnapshotTimer = null;
+let autoSnapshotReason = 'Changes saved';
+let lastAutoSnapshotAt = 0;
 
 // ===== HELPERS =====
 function uid() {
@@ -2657,6 +2736,19 @@ function markExpenseEdited(expenseId) {
   }, 7000);
 }
 
+function queueAutoSnapshot(reason='Changes saved') {
+  if (!storageAvailable) return;
+  autoSnapshotReason = reason;
+  if (autoSnapshotTimer) clearTimeout(autoSnapshotTimer);
+  autoSnapshotTimer = setTimeout(() => {
+    autoSnapshotTimer = null;
+    const now = Date.now();
+    if (now - lastAutoSnapshotAt < 60000) return;
+    lastAutoSnapshotAt = now;
+    createLocalSnapshot('Auto: ' + autoSnapshotReason, false);
+  }, 2200);
+}
+
 function undoDeleteExpense() {
   if (!pendingDeletedExpense) return;
   STATE.expenses.push(pendingDeletedExpense);
@@ -2762,6 +2854,8 @@ function renderSettings() {
   renderCategoryBudgetList();
   populateRecurringCatSelect();
   renderRecurringList();
+  updateSnapshotMeta();
+  renderBackupCenter();
   updateStorageBar();
   updateStorageStatusLine();
 }
@@ -3090,6 +3184,76 @@ function exportJSON() {
   showToast('Full backup exported!', 'success');
 }
 
+function getSnapshotStore() {
+  if (!storageAvailable) return [];
+  try {
+    const raw = localStorage.getItem(SNAPSHOTS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter(s => s && typeof s === 'object' && typeof s.id === 'string' && typeof s.createdAt === 'string' && s.data)
+      .slice(0, MAX_LOCAL_SNAPSHOTS);
+  } catch (_) {
+    return [];
+  }
+}
+
+function persistSnapshotStore(list) {
+  if (!storageAvailable) return false;
+  let items = Array.isArray(list) ? list.slice(0, MAX_LOCAL_SNAPSHOTS) : [];
+  while (true) {
+    try {
+      if (!items.length) {
+        localStorage.removeItem(SNAPSHOTS_KEY);
+      } else {
+        localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(items));
+      }
+      return true;
+    } catch (_) {
+      if (!items.length) return false;
+      items = items.slice(0, -1);
+    }
+  }
+}
+
+function createLocalSnapshot(label='Manual snapshot', notify=true) {
+  if (!storageAvailable) {
+    if (notify) showToast('Unable to create snapshot: local storage is unavailable.', 'error');
+    return null;
+  }
+
+  const snapshot = {
+    id: uid(),
+    type: label.startsWith('Auto:') ? 'auto' : 'manual',
+    label,
+    createdAt: new Date().toISOString(),
+    monthContext: monthKey(currentYear, currentMonth),
+    counts: {
+      expenses: STATE.expenses.length,
+      categories: STATE.categories.length,
+      recurring: STATE.recurring.length
+    },
+    data: JSON.parse(JSON.stringify(STATE))
+  };
+
+  const snapshots = [snapshot, ...getSnapshotStore()].slice(0, MAX_LOCAL_SNAPSHOTS);
+  const ok = persistSnapshotStore(snapshots);
+  if (!ok) {
+    if (notify) showToast('Unable to save snapshot. Storage may be full.', 'error');
+    return null;
+  }
+
+  try {
+    localStorage.setItem(SNAPSHOT_META_KEY, snapshot.createdAt);
+  } catch (_) {}
+
+  updateSnapshotMeta();
+  renderBackupCenter();
+  if (notify) showToast('Local snapshot saved.', 'success');
+  return snapshot;
+}
+
 function updateSnapshotMeta() {
   const meta = document.getElementById('snapshotMeta');
   if (!meta) return;
@@ -3097,31 +3261,139 @@ function updateSnapshotMeta() {
     meta.textContent = 'Snapshot history unavailable: storage access is blocked.';
     return;
   }
-  const stored = localStorage.getItem(SNAPSHOT_META_KEY);
+
+  const snapshots = getSnapshotStore();
+  const latest = snapshots[0];
+  const stored = latest ? latest.createdAt : localStorage.getItem(SNAPSHOT_META_KEY);
   if (!stored) {
     meta.textContent = 'No snapshot created yet.';
     return;
   }
+
   const d = new Date(stored);
-  meta.textContent = 'Last snapshot: ' + (Number.isNaN(d.getTime()) ? stored : d.toLocaleString('en-MY'));
+  const prefix = latest ? ('Last snapshot (' + (latest.type === 'auto' ? 'auto' : 'manual') + '): ') : 'Last snapshot: ';
+  meta.textContent = prefix + (Number.isNaN(d.getTime()) ? stored : d.toLocaleString('en-MY'));
+}
+
+function renderBackupCenter() {
+  const listEl = document.getElementById('backupList');
+  if (!listEl) return;
+  const snapshots = getSnapshotStore();
+  if (!snapshots.length) {
+    listEl.innerHTML = '<div class="cat-budget-empty">No local snapshots yet. Create one before major changes.</div>';
+    return;
+  }
+
+  listEl.innerHTML = snapshots.map((snap, idx) => {
+    const d = new Date(snap.createdAt);
+    const created = Number.isNaN(d.getTime()) ? snap.createdAt : d.toLocaleString('en-MY');
+    const sid = encodeURIComponent(snap.id);
+    const c = snap.counts || {};
+    return `<div class="backup-item">
+      <div class="backup-item-head">
+        <div class="backup-item-title">${escHtml(snap.label || 'Snapshot ' + (idx + 1))}</div>
+        <span class="backup-chip ${snap.type === 'auto' ? 'auto' : ''}">${snap.type === 'auto' ? 'Auto' : 'Manual'}</span>
+      </div>
+      <div class="backup-item-meta">${created} · ${escHtml(snap.monthContext || '—')} · ${Number(c.expenses || 0)} expenses · ${Number(c.recurring || 0)} recurring</div>
+      <div class="backup-item-actions">
+        <button class="btn btn-sm" onclick="restoreSnapshot(decodeURIComponent('${sid}'))">Restore</button>
+        <button class="btn btn-sm" onclick="downloadSnapshot(decodeURIComponent('${sid}'))">Download</button>
+        <button class="btn btn-sm" onclick="deleteSnapshot(decodeURIComponent('${sid}'))">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function restoreSnapshot(id) {
+  const snap = getSnapshotStore().find(s => s.id === id);
+  if (!snap) {
+    showToast('Snapshot not found.', 'error');
+    return;
+  }
+
+  openModal(
+    'Restore snapshot?',
+    'This will replace your current data with snapshot "' + snap.label + '" from ' + new Date(snap.createdAt).toLocaleString('en-MY') + '.',
+    () => {
+      STATE = normalizeState(snap.data);
+      clearPendingUndo();
+      editingExpenseId = null;
+      lastEditedExpenseId = null;
+      saveData('Snapshot restored', true);
+      init();
+      showPage('dashboard');
+      showToast('Snapshot restored.', 'success');
+    }
+  );
+}
+
+function downloadSnapshot(id) {
+  const snap = getSnapshotStore().find(s => s.id === id);
+  if (!snap) {
+    showToast('Snapshot not found.', 'error');
+    return;
+  }
+  const stamp = String(snap.createdAt || '').replace(/[:]/g, '-').replace('T', '_').slice(0, 19);
+  const payload = {
+    snapshotAt: snap.createdAt,
+    monthContext: snap.monthContext,
+    label: snap.label,
+    data: snap.data
+  };
+  download(JSON.stringify(payload, null, 2), `ledger_snapshot_${stamp || 'backup'}.json`, 'application/json');
+  showToast('Snapshot downloaded.', 'success');
+}
+
+function deleteSnapshot(id) {
+  const snapshots = getSnapshotStore();
+  const target = snapshots.find(s => s.id === id);
+  if (!target) {
+    showToast('Snapshot not found.', 'error');
+    return;
+  }
+  const next = snapshots.filter(s => s.id !== id);
+  if (!persistSnapshotStore(next)) {
+    showToast('Unable to delete snapshot.', 'error');
+    return;
+  }
+  updateSnapshotMeta();
+  renderBackupCenter();
+  showToast('Snapshot deleted.', '');
+}
+
+function clearSnapshotHistory() {
+  if (!getSnapshotStore().length) {
+    showToast('No snapshot history to clear.', '');
+    return;
+  }
+  openModal(
+    'Clear snapshot history?',
+    'This deletes all local snapshots. Current app data will remain untouched.',
+    () => {
+      if (!persistSnapshotStore([])) {
+        showToast('Unable to clear snapshot history.', 'error');
+        return;
+      }
+      try { localStorage.removeItem(SNAPSHOT_META_KEY); } catch (_) {}
+      updateSnapshotMeta();
+      renderBackupCenter();
+      showToast('Snapshot history cleared.', '');
+    }
+  );
 }
 
 function createSnapshotBackup() {
-  const now = new Date();
+  const snap = createLocalSnapshot('Quick snapshot', false);
+  const now = snap ? new Date(snap.createdAt) : new Date();
   const stamp = now.toISOString().replace(/[:]/g, '-').replace('T', '_').slice(0, 19);
   const payload = {
     snapshotAt: now.toISOString(),
-    monthContext: monthKey(currentYear, currentMonth),
-    data: STATE
+    monthContext: snap ? snap.monthContext : monthKey(currentYear, currentMonth),
+    data: snap ? snap.data : STATE
   };
   download(JSON.stringify(payload, null, 2), `ledger_snapshot_${stamp}.json`, 'application/json');
-
-  if (storageAvailable) {
-    try {
-      localStorage.setItem(SNAPSHOT_META_KEY, now.toISOString());
-    } catch (_) {}
-  }
   updateSnapshotMeta();
+  renderBackupCenter();
   showToast('Snapshot backup created.', 'success');
 }
 
@@ -3285,6 +3557,7 @@ function init() {
   populateAddCatSelect();
   applyRecurringForMonth(currentYear, currentMonth, true);
   updateSnapshotMeta();
+  renderBackupCenter();
   updateMonthLabel();
   updateSidebar();
   updateStorageStatusLine();
