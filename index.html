@@ -674,6 +674,253 @@ body {
   font-size: 12px;
   background: #fff6f6;
 }
+
+/* ===== MOBILE APP MODE ===== */
+body {
+  background:
+    radial-gradient(120% 100% at 50% -20%, #ffe8da 0%, #f4efe6 42%, #ece4d6 100%);
+  display: flex;
+  justify-content: center;
+}
+
+.app-wrap {
+  width: min(100%, 460px);
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  box-shadow: 0 18px 40px rgba(28, 25, 23, 0.12);
+}
+
+.sidebar {
+  display: none;
+}
+
+.main {
+  width: 100%;
+  min-height: 100dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(86px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, #fffcf7 0%, #f8f2e9 100%);
+}
+
+.topbar {
+  padding: 12px 14px;
+  background: rgba(255, 252, 247, 0.92);
+  backdrop-filter: blur(10px);
+}
+
+.topbar-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.app-brand {
+  display: flex;
+  flex-direction: column;
+  margin-right: 6px;
+}
+
+.app-brand-name {
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.app-brand-sub {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--faint);
+}
+
+.month-nav {
+  margin-left: auto;
+}
+
+.month-label {
+  min-width: 106px;
+}
+
+.topbar-right .btn:not(.btn-primary) {
+  display: none;
+}
+
+.btn-primary.btn-sm {
+  border-radius: 99px;
+  padding: 7px 12px;
+}
+
+.page {
+  padding: 14px 14px 22px;
+}
+
+.summary-grid {
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.summary-card {
+  padding: 14px 12px;
+  border-radius: 14px;
+}
+
+.sc-value {
+  font-size: 18px;
+}
+
+.sc-sub {
+  font-size: 10px;
+}
+
+.charts-grid {
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.chart-card {
+  padding: 14px;
+  border-radius: 14px;
+}
+
+.form-grid,
+.form-grid-2 {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.tc-header {
+  padding: 12px;
+}
+
+.tc-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+}
+
+.tc-actions .filter-input {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+#page-transactions .transactions-card {
+  overflow-x: auto;
+}
+
+#page-transactions .expense-table {
+  min-width: 620px;
+}
+
+.expense-table th,
+.expense-table td {
+  padding: 10px 12px;
+}
+
+.analytics-grid,
+.analytics-grid-3 {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.settings-section {
+  max-width: none;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.setting-row {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.setting-control {
+  width: 100%;
+}
+
+.setting-control .setting-input {
+  width: 100%;
+}
+
+.storage-bar {
+  flex-wrap: wrap;
+}
+
+#toast {
+  bottom: calc(84px + env(safe-area-inset-bottom));
+  right: 50%;
+  width: calc(100% - 24px);
+  max-width: 420px;
+  transform: translate(50%, 10px);
+}
+
+#toast.show {
+  transform: translate(50%, 0);
+}
+
+.mobile-tabbar {
+  position: fixed;
+  left: 50%;
+  bottom: max(8px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: calc(100% - 16px);
+  max-width: 444px;
+  z-index: 50;
+  background: rgba(255, 252, 247, 0.96);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: 0 10px 24px rgba(28, 25, 23, 0.16);
+  padding: 6px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+}
+
+.mobile-tabbar .nav-item {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+  padding: 7px 4px;
+  font-size: 10px;
+  border-radius: 12px;
+  color: var(--muted);
+}
+
+.mobile-tabbar .nav-item .icon {
+  width: auto;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.mobile-tabbar .nav-item.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+@media (display-mode: standalone) {
+  .topbar {
+    padding-top: calc(12px + env(safe-area-inset-top));
+  }
+}
+
+@media (min-width: 700px) {
+  body {
+    padding: 14px;
+  }
+
+  .app-wrap {
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    min-height: calc(100dvh - 28px);
+  }
+}
 </style>
 </head>
 <body>
@@ -691,20 +938,20 @@ body {
     </div>
     <nav class="sidebar-nav">
       <p class="nav-label">menu</p>
-      <button class="nav-item active" onclick="showPage('dashboard')">
+      <button class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
         <span class="icon">◈</span> Dashboard
       </button>
-      <button class="nav-item" onclick="showPage('add')">
+      <button class="nav-item" data-page="add" onclick="showPage('add')">
         <span class="icon">+</span> Add Expense
       </button>
-      <button class="nav-item" onclick="showPage('transactions')">
+      <button class="nav-item" data-page="transactions" onclick="showPage('transactions')">
         <span class="icon">≡</span> Transactions
       </button>
-      <button class="nav-item" onclick="showPage('analytics')">
+      <button class="nav-item" data-page="analytics" onclick="showPage('analytics')">
         <span class="icon">◑</span> Analytics
       </button>
       <p class="nav-label">system</p>
-      <button class="nav-item" onclick="showPage('settings')">
+      <button class="nav-item" data-page="settings" onclick="showPage('settings')">
         <span class="icon">⚙</span> Settings
       </button>
     </nav>
@@ -728,6 +975,10 @@ body {
     <!-- TOPBAR -->
     <div class="topbar">
       <div class="topbar-left">
+        <div class="app-brand" aria-hidden="true">
+          <span class="app-brand-name">ledger.</span>
+          <span class="app-brand-sub">mobile</span>
+        </div>
         <div class="month-nav">
           <button class="month-btn" onclick="changeMonth(-1)" title="Previous month">&#8249;</button>
           <div class="month-label" id="monthLabel">— — —</div>
@@ -1060,6 +1311,29 @@ body {
     </div><!-- end settings -->
 
   </div><!-- end main -->
+
+  <nav class="mobile-tabbar" aria-label="Primary Navigation">
+    <button class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
+      <span class="icon">◈</span>
+      <span>Home</span>
+    </button>
+    <button class="nav-item" data-page="add" onclick="showPage('add')">
+      <span class="icon">+</span>
+      <span>Add</span>
+    </button>
+    <button class="nav-item" data-page="transactions" onclick="showPage('transactions')">
+      <span class="icon">≡</span>
+      <span>List</span>
+    </button>
+    <button class="nav-item" data-page="analytics" onclick="showPage('analytics')">
+      <span class="icon">◑</span>
+      <span>Stats</span>
+    </button>
+    <button class="nav-item" data-page="settings" onclick="showPage('settings')">
+      <span class="icon">⚙</span>
+      <span>Settings</span>
+    </button>
+  </nav>
 </div><!-- end app-wrap -->
 
 <!-- ===== TOAST ===== -->
@@ -1254,16 +1528,16 @@ function getMonthExpenses(y=currentYear, m=currentMonth) {
 
 // ===== NAVIGATION =====
 function showPage(page) {
+  const target = document.getElementById('page-' + page);
+  if (!target) return;
+
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n => {
-    if (n.textContent.trim().toLowerCase().includes(page === 'dashboard' ? 'dashboard' :
-        page === 'add' ? 'add' : page === 'transactions' ? 'transactions' :
-        page === 'analytics' ? 'analytics' : 'settings')) {
-      n.classList.add('active');
-    }
+  target.classList.add('active');
+
+  document.querySelectorAll('.nav-item[data-page]').forEach(n => {
+    n.classList.toggle('active', n.dataset.page === page);
   });
+
   currentPage = page;
   if (page === 'dashboard') renderDashboard();
   if (page === 'transactions') renderTransactions();
