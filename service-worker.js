@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ledger-cache-v3';
+const CACHE_NAME = 'ledger-cache-v4';
 const APP_SHELL = [
   './',
   './index.html',
@@ -23,6 +23,42 @@ self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
+});
+
+// ===== PUSH NOTIFICATIONS =====
+self.addEventListener('push', event => {
+  if (!event.data) return;
+  
+  const data = event.data.json();
+  const options = {
+    body: data.body || 'New notification',
+    icon: data.icon || '/icons/icon-192.png',
+    badge: data.badge || '/icons/icon-192.png',
+    tag: data.tag || 'notification',
+    requireInteraction: data.requireInteraction || false,
+    data: data.data || {}
+  };
+  
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'Ledger', options)
+  );
+});
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window' }).then(windowClients => {
+      for (let i = 0; i < windowClients.length; i++) {
+        const client = windowClients[i];
+        if (client.url === '/' && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow('/');
+      }
+    })
+  );
 });
 
 self.addEventListener('activate', event => {
@@ -89,5 +125,17 @@ self.addEventListener('fetch', event => {
           .catch(() => cached);
       })
     );
+  }
+});
+
+// Handle messages from client for test notifications
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SEND_TEST_NOTIFICATION') {
+    self.registration.showNotification(event.data.title, {
+      body: event.data.body,
+      icon: event.data.icon || '/icons/icon-192.png',
+      badge: event.data.icon || '/icons/icon-192.png',
+      tag: 'test-notification'
+    });
   }
 });

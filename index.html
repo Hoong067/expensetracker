@@ -2385,6 +2385,21 @@ a:focus-visible {
         </div>
       </div>
 
+      <!-- Notifications -->
+      <div class="settings-section">
+        <div class="settings-title">notifications</div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Notification Permission</div>
+            <div class="setting-desc">Enable budget alerts and notifications. Works on desktop and iOS PWAs when app is open or closed.</div>
+          </div>
+          <div class="setting-control" style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-primary btn-sm" id="requestNotifBtn" onclick="requestNotificationPermission()">Enable Notifications</button>
+            <button class="btn btn-sm" id="testNotifBtn" onclick="sendTestNotification()">📬 Test</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Categories -->
       <div class="settings-section">
         <div class="settings-title">categories</div>
@@ -4441,6 +4456,7 @@ function requestNotificationPermission() {
   }
   
   if (Notification.permission === 'granted') {
+    subscribeToPushNotifications();
     return;
   }
   
@@ -4448,9 +4464,79 @@ function requestNotificationPermission() {
     Notification.requestPermission().then(permission => {
       if (permission === 'granted') {
         console.log('Notification permission granted');
+        subscribeToPushNotifications();
       }
     });
   }
+}
+
+function subscribeToPushNotifications() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    console.log('Push notifications not supported');
+    return;
+  }
+  
+  navigator.serviceWorker.ready.then(registration => {
+    registration.pushManager.getSubscription().then(subscription => {
+      if (!subscription) {
+        const vapidPublicKey = 'BE349mB--g5XGmVKZ8bdWYkkeY2sRzS--HrI53RvglWefZqLMDa8rFs77J_Y61ssniL1m5OrnzsO8lI8JCkqH7M';
+        const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+        
+        registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: convertedVapidKey
+        }).then(subscription => {
+          console.log('Push subscription successful:', subscription);
+          localStorage.setItem('pushSubscription', JSON.stringify(subscription));
+        }).catch(err => {
+          console.log('Push subscription failed:', err);
+        });
+      } else {
+        console.log('Already subscribed to push notifications');
+      }
+    });
+  });
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+  
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+function sendTestNotification() {
+  if (!('serviceWorker' in navigator)) {
+    showToast('Service Worker not available', 'error');
+    return;
+  }
+  
+  navigator.serviceWorker.ready.then(registration => {
+    registration.pushManager.getSubscription().then(subscription => {
+      if (!subscription) {
+        showToast('Not subscribed to notifications. Please enable notifications first.', 'warning');
+        return;
+      }
+      
+      // Send test notification via Service Worker
+      navigator.serviceWorker.controller.postMessage({
+        type: 'SEND_TEST_NOTIFICATION',
+        title: '✅ Test Notification',
+        body: 'If you see this, Web Push notifications work! 🎉 Try closing the app and triggering a notification.',
+        icon: '/icons/icon-192.png'
+      });
+      
+      showToast('Test notification sent!', 'success');
+    });
+  });
 }
 
 function sendBudgetAlert(budgetExceeded) {
@@ -4471,8 +4557,8 @@ function sendBudgetAlert(budgetExceeded) {
     
     new Notification('💰 Budget Alert', {
       body: `You've exceeded your budget by ${fmt(remaining)}! Review your spending in Analytics.`,
-      icon: '/icons/icon-192x192.png',
-      badge: '/icons/icon-192x192.png',
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
       tag: 'budget-alert',
       requireInteraction: false
     });
