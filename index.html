@@ -295,24 +295,134 @@ a:focus-visible {
 }
 
 .page.active.is-entering {
-  animation: pageIn 0.3s var(--ease-snap);
+  animation: pageIn 0.4s var(--ease-snap) forwards;
 }
 
 .page.is-exiting {
   display: block;
   opacity: 0;
-  transform: translateY(6px) scale(0.99);
+  transform: translateY(-8px) scale(0.97);
   pointer-events: none;
+  animation: pageOut 0.25s ease-in forwards;
 }
 
 @keyframes pageIn {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.988);
+    transform: translateY(16px) scale(0.985);
   }
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pageOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+  }
+}
+
+/* ===== ONBOARDING ===== */
+.onboarding-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease;
+}
+
+.onboarding-overlay.show {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.onboarding-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f9f7f4 100%);
+  border-radius: 20px;
+  padding: 32px 28px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.4s ease;
+}
+
+:root[data-theme="dark"] .onboarding-card {
+  background: linear-gradient(135deg, #0f1218 0%, #090c12 100%);
+}
+
+.onboarding-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.onboarding-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.onboarding-desc {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.onboarding-steps {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.onboarding-step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--faint);
+  transition: all 0.2s ease;
+}
+
+.onboarding-step-dot.active {
+  background: var(--accent);
+  width: 24px;
+  border-radius: 4px;
+}
+
+.onboarding-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.onboarding-buttons .btn {
+  flex: 1;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -2389,6 +2499,89 @@ a:focus-visible {
         </div>
       </div>
 
+      <!-- Help & FAQ -->
+      <div class="settings-section">
+        <div class="settings-title">⌨️ keyboard shortcuts</div>
+        <div style="display:grid;gap:10px;font-size:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:8px">
+            <span style="color:var(--text)"><strong>1</strong> - Dashboard</span>
+            <span style="color:var(--muted)">Quick nav home</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:8px">
+            <span style="color:var(--text)"><strong>2</strong> - Add Expense</span>
+            <span style="color:var(--muted)">Quick add transaction</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:8px">
+            <span style="color:var(--text)"><strong>3</strong> - Ledger</span>
+            <span style="color:var(--muted)">View all expenses</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:8px">
+            <span style="color:var(--text)"><strong>4</strong> - Insights</span>
+            <span style="color:var(--muted)">View analytics</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:8px">
+            <span style="color:var(--text)"><strong>5</strong> - Settings</span>
+            <span style="color:var(--muted)">Manage preferences</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px">
+            <span style="color:var(--text)"><strong>←/→</strong> - Month Nav</span>
+            <span style="color:var(--muted)">Previous/Next month</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-title">💡 tips & tricks</div>
+        <div style="display:grid;gap:12px;font-size:12px">
+          <div style="padding:10px;background:var(--surface2);border-radius:var(--radius);border-left:3px solid var(--accent)">
+            <strong style="color:var(--text)">💾 Auto-Save</strong><br>
+            <span style="color:var(--muted)">All expenses are automatically saved to your browser's local storage.</span>
+          </div>
+          <div style="padding:10px;background:var(--surface2);border-radius:var(--radius);border-left:3px solid var(--green)">
+            <strong style="color:var(--text)">📊 Recurring Expenses</strong><br>
+            <span style="color:var(--muted)">Set up recurring templates for monthly bills and subscriptions.</span>
+          </div>
+          <div style="padding:10px;background:var(--surface2);border-radius:var(--radius);border-left:3px solid var(--amber)">
+            <strong style="color:var(--text)">🏷️ Category Budgets</strong><br>
+            <span style="color:var(--muted)">Set optional budget limits per category to track spending limits.</span>
+          </div>
+          <div style="padding:10px;background:var(--surface2);border-radius:var(--radius);border-left:3px solid var(--accent)">
+            <strong style="color:var(--text)">📥 Backup Data</strong><br>
+            <span style="color:var(--muted)">Export and backup your data regularly in Backup Center.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-title">❓ frequently asked</div>
+        <div style="display:grid;gap:12px;font-size:12px">
+          <div>
+            <strong style="color:var(--text);display:block;margin-bottom:4px">Where is my data stored?</strong>
+            <span style="color:var(--muted)">All data is stored locally in your browser's localStorage. Nothing is sent to any server.</span>
+          </div>
+          <hr style="border:none;border-top:1px solid var(--border);margin:8px 0">
+          <div>
+            <strong style="color:var(--text);display:block;margin-bottom:4px">Will I lose my data if I clear browser cache?</strong>
+            <span style="color:var(--muted)">Yes, clearing browser data will delete all expenses. Always backup your data first!</span>
+          </div>
+          <hr style="border:none;border-top:1px solid var(--border);margin:8px 0">
+          <div>
+            <strong style="color:var(--text);display:block;margin-bottom:4px">Can I use this on mobile?</strong>
+            <span style="color:var(--muted)">Yes! It's fully responsive and works great on mobile. You can even install it as a web app.</span>
+          </div>
+          <hr style="border:none;border-top:1px solid var(--border);margin:8px 0">
+          <div>
+            <strong style="color:var(--text);display:block;margin-bottom:4px">How do I sync data across devices?</strong>
+            <span style="color:var(--muted)">Export your data as JSON, then import on another device. Cloud sync is not available.</span>
+          </div>
+          <hr style="border:none;border-top:1px solid var(--border);margin:8px 0">
+          <div>
+            <strong style="color:var(--text);display:block;margin-bottom:4px">Can I edit past expenses?</strong>
+            <span style="color:var(--muted)">Yes! Click on any expense to edit or delete it. Changes are instant.</span>
+          </div>
+        </div>
+      </div>
+
     </div><!-- end settings -->
 
   </div><!-- end main -->
@@ -2443,6 +2636,28 @@ a:focus-visible {
     <div class="modal-footer">
       <button class="btn btn-sm" onclick="closeModal()">Cancel</button>
       <button class="btn btn-sm btn-primary" id="modalConfirmBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ONBOARDING OVERLAY ===== -->
+<div class="onboarding-overlay" id="onboardingOverlay">
+  <div class="onboarding-card">
+    <button class="onboarding-close" onclick="closeOnboarding()">×</button>
+    
+    <div class="onboarding-icon" id="onboardingIcon">📊</div>
+    <div class="onboarding-title" id="onboardingTitle">Track Your Spending</div>
+    <div class="onboarding-desc" id="onboardingDesc">Welcome to Ledger! Let's set up your first budget and start tracking expenses.</div>
+    
+    <div class="onboarding-steps">
+      <div class="onboarding-step-dot active" onclick="goToOnboardingStep(0)"></div>
+      <div class="onboarding-step-dot" onclick="goToOnboardingStep(1)"></div>
+      <div class="onboarding-step-dot" onclick="goToOnboardingStep(2)"></div>
+    </div>
+    
+    <div class="onboarding-buttons">
+      <button class="btn btn-sm" onclick="closeOnboarding()">Skip</button>
+      <button class="btn btn-sm btn-primary" onclick="nextOnboardingStep()">Next</button>
     </div>
   </div>
 </div>
@@ -2864,6 +3079,14 @@ function renderDashboard() {
   const daysInMonth = new Date(currentYear, currentMonth+1, 0).getDate();
   const avgDaily = spent / daysInMonth;
   const largest = list.length ? Math.max(...list.map(e => e.amount)) : 0;
+
+  // Send notification if budget exceeded
+  if (budget > 0 && pct >= 100 && !STATE.budgetAlertSent) {
+    STATE.budgetAlertSent = true;
+    sendBudgetAlert(true);
+  } else if (budget > 0 && pct < 100) {
+    STATE.budgetAlertSent = false;
+  }
 
   // Hero
   document.getElementById('dashSpentBig').textContent = fmt(spent);
@@ -4122,9 +4345,147 @@ function initTheme() {
   setTheme(theme);
 }
 
+// ===== ONBOARDING SYSTEM =====
+const ONBOARDING_SEEN_KEY = 'ledger_onboarding_seen';
+let currentOnboardingStep = 0;
+const onboardingSteps = [
+  {
+    icon: '📊',
+    title: 'Track Your Spending',
+    desc: 'Welcome to Ledger! Record your daily expenses and track where your money goes.'
+  },
+  {
+    icon: '💰',
+    title: 'Set Your Budget',
+    desc: 'Go to Settings and set a monthly budget. We\'ll help you stay in control of spending.'
+  },
+  {
+    icon: '📈',
+    title: 'View Insights',
+    desc: 'Check Analytics to see spending trends by category and spot opportunities to save.'
+  }
+];
+
+function showOnboarding() {
+  const overlay = document.getElementById('onboardingOverlay');
+  if (overlay) {
+    overlay.style.display = 'flex';
+    currentOnboardingStep = 0;
+    updateOnboardingStep();
+  }
+}
+
+function closeOnboarding() {
+  const overlay = document.getElementById('onboardingOverlay');
+  if (overlay) {
+    overlay.style.display = 'none';
+  }
+  try {
+    localStorage.setItem(ONBOARDING_SEEN_KEY, 'true');
+  } catch (e) {
+    console.error('Failed to save onboarding state:', e);
+  }
+}
+
+function updateOnboardingStep() {
+  if (!onboardingSteps[currentOnboardingStep]) return;
+  
+  const step = onboardingSteps[currentOnboardingStep];
+  const iconEl = document.getElementById('onboardingIcon');
+  const titleEl = document.getElementById('onboardingTitle');
+  const descEl = document.getElementById('onboardingDesc');
+  
+  if (iconEl) iconEl.textContent = step.icon;
+  if (titleEl) titleEl.textContent = step.title;
+  if (descEl) descEl.textContent = step.desc;
+  
+  // Update step dots
+  const dots = document.querySelectorAll('.onboarding-step-dot');
+  dots.forEach((dot, index) => {
+    if (index === currentOnboardingStep) {
+      dot.classList.add('active');
+    } else {
+      dot.classList.remove('active');
+    }
+  });
+}
+
+function nextOnboardingStep() {
+  if (currentOnboardingStep < onboardingSteps.length - 1) {
+    currentOnboardingStep++;
+    updateOnboardingStep();
+  } else {
+    closeOnboarding();
+  }
+}
+
+function prevOnboardingStep() {
+  if (currentOnboardingStep > 0) {
+    currentOnboardingStep--;
+    updateOnboardingStep();
+  }
+}
+
+function goToOnboardingStep(index) {
+  if (index >= 0 && index < onboardingSteps.length) {
+    currentOnboardingStep = index;
+    updateOnboardingStep();
+  }
+}
+
+// ===== NOTIFICATIONS SYSTEM =====
+function requestNotificationPermission() {
+  if (!('Notification' in window)) {
+    console.log('Browser does not support notifications');
+    return;
+  }
+  
+  if (Notification.permission === 'granted') {
+    return;
+  }
+  
+  if (Notification.permission !== 'denied') {
+    Notification.requestPermission().then(permission => {
+      if (permission === 'granted') {
+        console.log('Notification permission granted');
+      }
+    });
+  }
+}
+
+function sendBudgetAlert(budgetExceeded) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') {
+    console.log('Notifications not available or not granted');
+    return;
+  }
+  
+  if (budgetExceeded) {
+    const spent = STATE.expenses
+      .filter(e => {
+        const d = new Date(e.date + 'T00:00:00');
+        return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
+      })
+      .reduce((s, e) => s + e.amount, 0);
+    
+    const remaining = Math.abs(STATE.budget - spent);
+    
+    new Notification('💰 Budget Alert', {
+      body: `You've exceeded your budget by ${fmt(remaining)}! Review your spending in Analytics.`,
+      icon: '/icons/icon-192x192.png',
+      badge: '/icons/icon-192x192.png',
+      tag: 'budget-alert',
+      requireInteraction: false
+    });
+  }
+}
+
 // ===== INIT =====
 function init() {
   initTheme();
+  requestNotificationPermission();
+  if (!localStorage.getItem(ONBOARDING_SEEN_KEY)) {
+    showOnboarding();
+  }
   resetAddForm();
   setAddMode(false);
   populateRecurringCatSelect();
