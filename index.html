@@ -484,6 +484,18 @@ body {
   transform: none;
 }
 
+/* ===== DASHBOARD STAGGER ===== */
+.dash-stagger-item {
+  opacity: 0;
+  transform: translateY(12px) scale(0.995);
+  transition: opacity 0.38s var(--ease-out), transform 0.38s var(--ease-out);
+}
+
+.dash-stagger-item.revealed {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
 .chart-card-title {
   font-size: 9px;
   text-transform: uppercase;
@@ -985,10 +997,23 @@ body {
 }
 
 .mobile-tabbar .nav-item .icon {
-  width: auto;
-  font-size: 15px;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   line-height: 1;
   transition: transform 0.2s ease;
+}
+
+.mobile-tabbar .nav-item .icon svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 1.85;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .mobile-tabbar .nav-item .label {
@@ -1048,6 +1073,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .page,
   .page.active.is-entering,
+  .dash-stagger-item,
   .summary-card,
   .chart-card,
   .chart-card canvas,
@@ -1147,7 +1173,7 @@ body {
         </div>
       </div>
 
-      <div class="dashboard-hero">
+      <div class="dashboard-hero dash-stagger-item">
         <div class="hero-kicker">month snapshot</div>
         <div class="hero-main">
           <div>
@@ -1171,12 +1197,12 @@ body {
 
       <!-- Charts -->
       <div class="charts-grid dashboard-charts">
-        <div class="chart-card">
+        <div class="chart-card dash-stagger-item">
           <div class="chart-card-title">spending by category</div>
           <div class="chart-wrap"><canvas id="donutChart"></canvas></div>
           <div class="legend" id="donutLegend"></div>
         </div>
-        <div class="chart-card">
+        <div class="chart-card dash-stagger-item">
           <div class="chart-card-title">monthly trend — last 6 months</div>
           <div class="chart-wrap" style="height:210px"><canvas id="trendChart"></canvas></div>
         </div>
@@ -1184,22 +1210,22 @@ body {
 
       <!-- Summary cards -->
       <div class="summary-grid">
-        <div class="summary-card">
+        <div class="summary-card dash-stagger-item">
           <div class="sc-label">Total Spent</div>
           <div class="sc-value" id="cardTotal">RM 0.00</div>
           <div class="sc-sub" id="cardTotalSub">0 transactions</div>
         </div>
-        <div class="summary-card">
+        <div class="summary-card dash-stagger-item">
           <div class="sc-label">Budget Limit</div>
           <div class="sc-value" id="cardBudget">RM 3,000</div>
           <div class="sc-sub" id="cardBudgetSub">click settings to edit</div>
         </div>
-        <div class="summary-card">
+        <div class="summary-card dash-stagger-item">
           <div class="sc-label">Remaining</div>
           <div class="sc-value green" id="cardRemain">RM 3,000</div>
           <div class="sc-sub" id="cardRemainSub">0% used</div>
         </div>
-        <div class="summary-card">
+        <div class="summary-card dash-stagger-item">
           <div class="sc-label">Daily Average</div>
           <div class="sc-value amber" id="cardAvg">RM 0</div>
           <div class="sc-sub" id="cardAvgSub">this month</div>
@@ -1207,7 +1233,7 @@ body {
       </div>
 
       <!-- Recent transactions -->
-      <div class="transactions-card">
+      <div class="transactions-card dash-stagger-item">
         <div class="tc-header">
           <div class="tc-title">recent transactions</div>
           <button class="btn btn-sm" onclick="showPage('transactions')">view all →</button>
@@ -1476,23 +1502,33 @@ body {
   <nav class="mobile-tabbar" aria-label="Primary Navigation">
     <span class="mobile-tab-indicator" aria-hidden="true"></span>
     <button class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
-      <span class="icon">⌂</span>
+      <span class="icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5"></path><path d="M5 9.5V20h14V9.5"></path><path d="M10 20v-6h4v6"></path></svg>
+      </span>
       <span class="label">Home</span>
     </button>
     <button class="nav-item" data-page="add" onclick="showPage('add')">
-      <span class="icon">＋</span>
+      <span class="icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"></circle><path d="M12 8v8"></path><path d="M8 12h8"></path></svg>
+      </span>
       <span class="label">Add</span>
     </button>
     <button class="nav-item" data-page="transactions" onclick="showPage('transactions')">
-      <span class="icon">☰</span>
+      <span class="icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"></rect><path d="M8 9h8"></path><path d="M8 13h8"></path><path d="M8 17h5"></path></svg>
+      </span>
       <span class="label">Ledger</span>
     </button>
     <button class="nav-item" data-page="analytics" onclick="showPage('analytics')">
-      <span class="icon">◔</span>
+      <span class="icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M3 20h18"></path><path d="M6 18V9"></path><path d="M12 18V5"></path><path d="M18 18v-7"></path></svg>
+      </span>
       <span class="label">Stats</span>
     </button>
     <button class="nav-item" data-page="settings" onclick="showPage('settings')">
-      <span class="icon">⚙</span>
+      <span class="icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0A1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </span>
       <span class="label">Settings</span>
     </button>
   </nav>
@@ -1710,6 +1746,16 @@ function revealCharts(scopeId) {
   });
 }
 
+function revealDashboardSections() {
+  const scope = document.getElementById('page-dashboard');
+  if (!scope) return;
+  const blocks = scope.querySelectorAll('.dash-stagger-item');
+  blocks.forEach((block, idx) => {
+    block.classList.remove('revealed');
+    window.setTimeout(() => block.classList.add('revealed'), 30 + Math.min(idx * 65, 390));
+  });
+}
+
 // ===== NAVIGATION =====
 function showPage(page) {
   const target = document.getElementById('page-' + page);
@@ -1817,6 +1863,7 @@ function renderDashboard() {
   renderDonut(list);
   renderTrend();
   renderRecent(list);
+  revealDashboardSections();
   revealCharts('page-dashboard');
 }
 
