@@ -57,6 +57,32 @@ html {
   --ease-snap: cubic-bezier(.22,1,.36,1);
 }
 
+/* ===== LIGHT THEME ===== */
+:root[data-theme="light"] {
+  --bg: #fafaf8;
+  --surface: #ffffff;
+  --surface2: #f5f3f0;
+  --surface3: #ebe7e1;
+  --border: #e5e0d8;
+  --border2: #d9d3ca;
+  --accent: #3b82f6;
+  --accent-h: #2563eb;
+  --green: #16a34a;
+  --amber: #d97706;
+  --red: #dc2626;
+  --text: #1f2937;
+  --muted: #4b5563;
+  --faint: #6b7280;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --font-display: 'Fraunces', serif;
+  --font-body: 'DM Mono', monospace;
+  --ease-out: cubic-bezier(.2,.75,.25,1);
+  --ease-snap: cubic-bezier(.22,1,.36,1);
+}
+
 body {
   min-height: 100vh;
   font-family: var(--font-body);
@@ -69,6 +95,14 @@ body {
     var(--bg);
   display: flex;
   justify-content: center;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+:root[data-theme="light"] body {
+  background:
+    radial-gradient(120% 140% at 10% -20%, #f3f0eb 0%, rgba(243, 240, 235, 0) 45%),
+    radial-gradient(120% 140% at 90% -30%, #faf8f5 0%, rgba(250, 248, 245, 0) 45%),
+    var(--bg);
 }
 
 .app-wrap {
@@ -80,6 +114,12 @@ body {
   border: 1px solid rgba(79, 140, 255, 0.15);
   box-shadow: var(--shadow-md);
   position: relative;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+:root[data-theme="light"] .app-wrap {
+  background: linear-gradient(180deg, #ffffff 0%, #faf8f5 100%);
+  border-color: rgba(59, 130, 246, 0.15);
 }
 
 /* Keep desktop sidebar markup in DOM but hidden for app-like shell */
@@ -1475,6 +1515,412 @@ a:focus-visible {
     bottom: max(8px, env(safe-area-inset-bottom));
   }
 }
+
+/* ===== LIGHT THEME OVERRIDES ===== */
+:root[data-theme="light"] .topbar {
+  border-bottom-color: rgba(59, 130, 246, 0.1);
+  background: rgba(255, 255, 255, 0.86);
+}
+
+:root[data-theme="light"] .app-brand-name {
+  color: #1e40af;
+}
+
+:root[data-theme="light"] .app-brand-sub {
+  color: var(--faint);
+}
+
+:root[data-theme="light"] .month-btn {
+  background: var(--surface2);
+  border-color: var(--border);
+}
+
+:root[data-theme="light"] .month-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: var(--accent);
+}
+
+:root[data-theme="light"] .add-card,
+:root[data-theme="light"] .transactions-card,
+:root[data-theme="light"] .settings-section {
+  background: linear-gradient(180deg, #ffffff 0%, #faf9f7 100%);
+}
+
+:root[data-theme="light"] .field input,
+:root[data-theme="light"] .field select,
+:root[data-theme="light"] .field textarea,
+:root[data-theme="light"] .setting-input,
+:root[data-theme="light"] .filter-input,
+:root[data-theme="light"] .filter-sel {
+  background: #ffffff;
+  border-color: var(--border);
+}
+
+:root[data-theme="light"] .field input:focus,
+:root[data-theme="light"] .field select:focus,
+:root[data-theme="light"] .field textarea:focus,
+:root[data-theme="light"] .setting-input:focus,
+:root[data-theme="light"] .filter-input:focus,
+:root[data-theme="light"] .filter-sel:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+:root[data-theme="light"] .field input::placeholder,
+:root[data-theme="light"] .setting-input::placeholder,
+:root[data-theme="light"] .filter-input::placeholder {
+  color: #9ca3af;
+}
+
+:root[data-theme="light"] .empty-state {
+  color: #4b5563 !important;
+}
+
+:root[data-theme="light"] .empty-icon {
+  opacity: 0.8;
+}
+
+:root[data-theme="light"] .expense-card {
+  background: rgba(245, 243, 240, 0.7);
+  border-color: rgba(59, 130, 246, 0.1);
+}
+
+:root[data-theme="light"] .expense-card:hover {
+  background: rgba(235, 231, 225, 0.5);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+:root[data-theme="light"] .expense-amount {
+  color: #15803d;
+}
+
+:root[data-theme="light"] .cat-badge {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: var(--border);
+  color: #1f2937;
+}
+
+:root[data-theme="light"] .tc-footer {
+  background: #faf8f5;
+  border-top-color: var(--border);
+}
+
+:root[data-theme="light"] .summary-card {
+  background: linear-gradient(135deg, #ffffff 0%, #faf8f5 100%);
+}
+
+:root[data-theme="light"] .dashboard-hero {
+  background: linear-gradient(135deg, #ffffff 0%, #f5f3f0 100%);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+:root[data-theme="light"] .dashboard-hero::after {
+  background: rgba(59, 130, 246, 0.08);
+}
+
+:root[data-theme="light"] .category-budget-card {
+  background: linear-gradient(180deg, #ffffff 0%, #faf9f7 100%);
+  border-color: #e5e0d8;
+}
+
+:root[data-theme="light"] .hero-pill {
+  border-color: rgba(22, 163, 74, 0.3);
+  color: #15803d;
+  background: rgba(22, 163, 74, 0.1);
+}
+
+:root[data-theme="light"] .hero-pill.warn {
+  border-color: rgba(217, 119, 6, 0.3);
+  color: #b45309;
+  background: rgba(217, 119, 6, 0.1);
+}
+
+:root[data-theme="light"] .hero-pill.over {
+  border-color: rgba(220, 38, 38, 0.3);
+  color: #dc2626;
+  background: rgba(220, 38, 38, 0.1);
+}
+
+:root[data-theme="light"] .sc-value {
+  color: #111827 !important;
+}
+
+:root[data-theme="light"] .sc-value.red {
+  color: #dc2626 !important;
+}
+
+:root[data-theme="light"] .sc-value.green {
+  color: #16a34a !important;
+}
+
+:root[data-theme="light"] .sc-value.amber {
+  color: #d97706 !important;
+}
+
+:root[data-theme="light"] .sc-label {
+  color: #4b5563 !important;
+}
+
+:root[data-theme="light"] .hero-mini-item {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(59, 130, 246, 0.15);
+}
+
+:root[data-theme="light"] .hero-mini-label {
+  color: #4b5563 !important;
+}
+
+:root[data-theme="light"] .hero-mini-value {
+  color: #111827 !important;
+}
+
+:root[data-theme="light"] .chart-card {
+  background: linear-gradient(180deg, #ffffff 0%, #faf9f7 100%);
+}
+
+:root[data-theme="light"] .data-info-box {
+  background: linear-gradient(160deg, rgba(59, 130, 246, 0.1) 0%, rgba(34, 197, 94, 0.08) 100%);
+  border-color: rgba(59, 130, 246, 0.2);
+  color: #1f2937;
+}
+
+:root[data-theme="light"] .mobile-tabbar {
+  background: linear-gradient(180deg, #ffffff 0%, #faf8f5 100%);
+  border-color: rgba(59, 130, 246, 0.1);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(59, 130, 246, 0.1);
+}
+
+:root[data-theme="light"] .mobile-tabbar .nav-item {
+  color: #9ca3af;
+}
+
+:root[data-theme="light"] .mobile-tabbar .nav-item:hover {
+  color: #6b7280;
+}
+
+:root[data-theme="light"] .mobile-tabbar .nav-item.active {
+  color: #1f2937;
+}
+
+:root[data-theme="light"] .mobile-tabbar .nav-fab {
+  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 18px 30px rgba(37, 99, 235, 0.3), 0 0 0 8px rgba(255, 255, 255, 0.95);
+}
+
+:root[data-theme="light"] .modal {
+  background: linear-gradient(180deg, #ffffff 0%, #faf8f5 100%);
+  border-color: var(--border);
+}
+
+:root[data-theme="light"] .modal-overlay {
+  background: rgba(31, 41, 55, 0.6);
+}
+
+:root[data-theme="light"] #updateBanner {
+  background: linear-gradient(160deg, rgba(34, 197, 94, 0.15) 0%, rgba(6, 95, 70, 0.1) 100%);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: #15803d;
+}
+
+:root[data-theme="light"] #toast {
+  background: #1f2937;
+  color: #f8fafc;
+  border-color: rgba(75, 85, 99, 0.3);
+}
+
+:root[data-theme="light"] #undoToast {
+  background: #f3f1ed;
+  color: #1f2937;
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+:root[data-theme="light"] .storage-track {
+  background: #e5e0d8;
+}
+
+:root[data-theme="light"] .page-sub,
+:root[data-theme="light"] .setting-desc,
+:root[data-theme="light"] .add-card-title,
+:root[data-theme="light"] .settings-title,
+:root[data-theme="light"] .tc-title,
+:root[data-theme="light"] .hero-kicker,
+:root[data-theme="light"] .chart-card-title {
+  color: #4b5563 !important;
+}
+
+:root[data-theme="light"] .legend-item {
+  color: #4b5563 !important;
+}
+
+:root[data-theme="light"] .page-h,
+:root[data-theme="light"] .modal-title {
+  color: #111827 !important;
+}
+
+:root[data-theme="light"] .app-brand-name {
+  color: #1e40af !important;
+}
+
+:root[data-theme="light"] .expense-desc,
+:root[data-theme="light"] .settings-list-label {
+  color: #1f2937 !important;
+}
+
+:root[data-theme="light"] .expense-meta,
+:root[data-theme="light"] .hero-meta,
+:root[data-theme="light"] .backup-item-meta,
+:root[data-theme="light"] .storage-status-line {
+  color: #4b5563 !important;
+}
+
+:root[data-theme="light"] .hero-headline,
+:root[data-theme="light"] .hero-mini-label,
+:root[data-theme="light"] .sc-label {
+  color: #4b5563 !important;
+}
+
+:root[data-theme="light"] .hero-value,
+:root[data-theme="light"] .hero-mini-value,
+:root[data-theme="light"] .sc-value {
+  color: #111827 !important;
+}
+
+:root[data-theme="light"] .month-label {
+  color: #1f2937 !important;
+}
+
+:root[data-theme="light"] .field label {
+  color: #4b5563 !important;
+}
+
+:root[data-theme="light"] .setting-label {
+  color: #1f2937 !important;
+}
+
+:root[data-theme="light"] .recurring-chip {
+  border-color: #1e40af;
+  background: rgba(59, 130, 246, 0.15);
+  color: #1e40af !important;
+}
+
+:root[data-theme="light"] .recurring-chip.off {
+  border-color: #9ca3af;
+  background: rgba(156, 163, 175, 0.12);
+  color: #4b5563 !important;
+}
+
+:root[data-theme="light"] .cat-badge {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: #bfdbfe;
+  color: #1e40af !important;
+}
+
+:root[data-theme="light"] .mobile-tabbar .nav-item {
+  color: #6b7280 !important;
+}
+
+:root[data-theme="light"] .mobile-tabbar .nav-item:hover {
+  color: #4b5563 !important;
+}
+
+:root[data-theme="light"] .mobile-tabbar .nav-item.active {
+  color: #1e40af !important;
+}
+
+:root[data-theme="light"] .modal-desc,
+:root[data-theme="light"] .undo-msg {
+  color: #4b5563 !important;
+}
+
+:root[data-theme="light"] #updateBanner {
+  color: #15803d !important;
+}
+
+:root[data-theme="light"] .settings-list-row {
+  background: linear-gradient(135deg, #f5f3f0 0%, #ffffff 100%);
+  border-color: #e5e0d8;
+}
+
+:root[data-theme="light"] .settings-list-label {
+  color: #1f2937 !important;
+}
+
+:root[data-theme="light"] .settings-mini-input {
+  background: #ffffff;
+  border-color: #e5e0d8;
+  color: #1f2937;
+}
+
+:root[data-theme="light"] .backup-item {
+  background: linear-gradient(135deg, #f5f3f0 0%, #ffffff 100%);
+  border-color: #e5e0d8;
+}
+
+:root[data-theme="light"] .backup-item-title {
+  color: #1f2937 !important;
+}
+
+:root[data-theme="light"] .backup-item-meta {
+  color: #4b5563 !important;
+}
+
+:root[data-theme="light"] .backup-chip {
+  border-color: #bfdbfe;
+  background: rgba(59, 130, 246, 0.1);
+  color: #1e40af !important;
+}
+
+:root[data-theme="light"] .backup-chip.auto {
+  border-color: #bfdbfe;
+  background: rgba(59, 130, 246, 0.15);
+  color: #1e40af !important;
+}
+
+:root[data-theme="light"] .storage-bar {
+  background: linear-gradient(135deg, #f5f3f0 0%, #ffffff 100%);
+  border-color: #e5e0d8;
+  color: #4b5563;
+}
+
+:root[data-theme="light"] .storage-track {
+  background: #e5e0d8;
+}
+
+:root[data-theme="light"] .storage-fill {
+  background: linear-gradient(90deg, #3b82f6 0%, #16a34a 100%);
+}
+
+:root[data-theme="light"] .tc-footer {
+  background: #f5f3f0;
+  border-top-color: #e5e0d8;
+  color: #4b5563;
+}
+
+:root[data-theme="light"] .tc-total {
+  color: #1e40af !important;
+}
+
+:root[data-theme="light"] .cat-budget-row {
+  border-color: rgba(59, 130, 246, 0.2);
+  background: rgba(59, 130, 246, 0.08);
+}
+
+:root[data-theme="light"] .cat-budget-name {
+  color: #1f2937 !important;
+}
+
+:root[data-theme="light"] .cat-budget-meta {
+  color: #4b5563 !important;
+}
+
+:root[data-theme="light"] .cat-budget-track {
+  background: #e5e0d8;
+}
+
+:root[data-theme="light"] .cat-budget-empty {
+  color: #4b5563 !important;
+}
+
 </style>
 </head>
 <body>
@@ -1810,6 +2256,21 @@ a:focus-visible {
           <div class="setting-control" style="display:flex;gap:8px">
             <input type="number" class="setting-input" id="settingBudget" min="1" step="1">
             <button class="btn btn-primary btn-sm" onclick="saveBudget()">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Theme -->
+      <div class="settings-section">
+        <div class="settings-title">theme</div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Display Theme</div>
+            <div class="setting-desc">Choose between light and dark theme</div>
+          </div>
+          <div class="setting-control" style="display:flex;gap:8px">
+            <button class="btn btn-primary btn-sm" id="themeBtnDark" onclick="setTheme('dark')" style="flex:1;justify-content:center">🌙 Dark</button>
+            <button class="btn btn-sm" id="themeBtnLight" onclick="setTheme('light')" style="flex:1;justify-content:center">☀️ Light</button>
           </div>
         </div>
       </div>
@@ -2884,6 +3345,8 @@ function renderAnalytics() {
 // ===== SETTINGS =====
 function renderSettings() {
   document.getElementById('settingBudget').value = STATE.budget;
+  const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+  updateThemeButtons(currentTheme);
   renderCatList();
   renderCategoryBudgetList();
   populateRecurringCatSelect();
@@ -3596,8 +4059,72 @@ function registerServiceWorker() {
   });
 }
 
+// ===== THEME MANAGEMENT =====
+const THEME_STORAGE_KEY = 'ledger_theme';
+
+function setTheme(theme) {
+  if (theme !== 'light' && theme !== 'dark') {
+    theme = 'dark'; // default to dark
+  }
+  
+  // Set the root data-theme attribute
+  document.documentElement.setAttribute('data-theme', theme);
+  
+  // Save preference to localStorage
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch (e) {
+    console.error('Failed to save theme preference:', e);
+  }
+  
+  // Update button states
+  updateThemeButtons(theme);
+  
+  // Show confirmation toast
+  showToast(`${theme === 'dark' ? '🌙 Dark' : '☀️ Light'} theme activated`, 'success');
+}
+
+function getTheme() {
+  // Check if theme is saved in localStorage
+  try {
+    const saved = localStorage.getItem(THEME_STORAGE_KEY);
+    if (saved === 'light' || saved === 'dark') {
+      return saved;
+    }
+  } catch (e) {
+    console.error('Failed to retrieve theme preference:', e);
+  }
+  
+  // Default to system preference or dark
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+    return 'light';
+  }
+  return 'dark';
+}
+
+function updateThemeButtons(currentTheme) {
+  const darkBtn = document.getElementById('themeBtnDark');
+  const lightBtn = document.getElementById('themeBtnLight');
+  
+  if (!darkBtn || !lightBtn) return;
+  
+  if (currentTheme === 'dark') {
+    darkBtn.classList.add('btn-primary');
+    lightBtn.classList.remove('btn-primary');
+  } else {
+    lightBtn.classList.add('btn-primary');
+    darkBtn.classList.remove('btn-primary');
+  }
+}
+
+function initTheme() {
+  const theme = getTheme();
+  setTheme(theme);
+}
+
 // ===== INIT =====
 function init() {
+  initTheme();
   resetAddForm();
   setAddMode(false);
   populateRecurringCatSelect();
