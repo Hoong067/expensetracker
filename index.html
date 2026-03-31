@@ -4513,9 +4513,21 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
+let testNotificationInterval = null;
+let testNotificationCount = 0;
+
 function sendTestNotification() {
   if (!('serviceWorker' in navigator)) {
     showToast('Service Worker not available', 'error');
+    return;
+  }
+  
+  // Stop if already running
+  if (testNotificationInterval) {
+    clearInterval(testNotificationInterval);
+    testNotificationInterval = null;
+    testNotificationCount = 0;
+    showToast('Reminder notifications stopped', 'success');
     return;
   }
   
@@ -4526,15 +4538,35 @@ function sendTestNotification() {
         return;
       }
       
-      // Send test notification via Service Worker
-      navigator.serviceWorker.controller.postMessage({
-        type: 'SEND_TEST_NOTIFICATION',
-        title: '✅ Test Notification',
-        body: 'If you see this, Web Push notifications work! 🎉 Try closing the app and triggering a notification.',
-        icon: '/icons/icon-192.png'
-      });
+      testNotificationCount = 0;
       
-      showToast('Test notification sent!', 'success');
+      // Send first notification immediately
+      const sendReminder = () => {
+        testNotificationCount++;
+        navigator.serviceWorker.controller.postMessage({
+          type: 'SEND_TEST_NOTIFICATION',
+          title: `💰 Save Expense Reminder #${testNotificationCount}`,
+          body: `Don't forget to save your expense! You've received ${testNotificationCount} reminder${testNotificationCount > 1 ? 's' : ''}.`,
+          icon: '/icons/icon-192.png'
+        });
+      };
+      
+      // Send first one immediately
+      sendReminder();
+      showToast('Reminder notifications started! (Click test again to stop)', 'success');
+      
+      // Then send every 5 seconds
+      testNotificationInterval = setInterval(sendReminder, 5000);
+      
+      // Auto stop after 1 minute (12 reminders)
+      setTimeout(() => {
+        if (testNotificationInterval) {
+          clearInterval(testNotificationInterval);
+          testNotificationInterval = null;
+          testNotificationCount = 0;
+          showToast('Reminder notifications stopped after 1 minute', '');
+        }
+      }, 60000);
     });
   });
 }
