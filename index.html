@@ -54,6 +54,7 @@ html {
   --font-display: 'Fraunces', serif;
   --font-body: 'DM Mono', monospace;
   --ease-out: cubic-bezier(.2,.75,.25,1);
+  --ease-snap: cubic-bezier(.22,1,.36,1);
 }
 
 body {
@@ -239,7 +240,7 @@ body {
 }
 
 .page.active.is-entering {
-  animation: pageIn 0.34s var(--ease-out);
+  animation: pageIn 0.3s var(--ease-snap);
 }
 
 .page.is-exiting {
@@ -252,7 +253,7 @@ body {
 @keyframes pageIn {
   from {
     opacity: 0;
-    transform: translateY(14px) scale(0.985);
+    transform: translateY(12px) scale(0.988);
   }
   to {
     opacity: 1;
@@ -465,7 +466,7 @@ body {
   padding: 14px;
   opacity: 0;
   transform: translateY(14px) scale(0.992);
-  transition: opacity 0.45s var(--ease-out), transform 0.45s var(--ease-out);
+  transition: opacity 0.38s var(--ease-snap), transform 0.38s var(--ease-snap);
 }
 
 .chart-card.revealed {
@@ -476,7 +477,7 @@ body {
 .chart-card canvas {
   opacity: 0.3;
   transform: translateY(7px) scale(0.99);
-  transition: opacity 0.45s var(--ease-out), transform 0.45s var(--ease-out);
+  transition: opacity 0.36s var(--ease-snap), transform 0.36s var(--ease-snap);
 }
 
 .chart-card.revealed canvas {
@@ -488,7 +489,7 @@ body {
 .dash-stagger-item {
   opacity: 0;
   transform: translateY(12px) scale(0.995);
-  transition: opacity 0.38s var(--ease-out), transform 0.38s var(--ease-out);
+  transition: opacity 0.32s var(--ease-snap), transform 0.32s var(--ease-snap);
 }
 
 .dash-stagger-item.revealed {
@@ -972,7 +973,7 @@ body {
   border-radius: 14px;
   background: linear-gradient(180deg, #66a3ff 0%, #4f8cff 100%);
   box-shadow: 0 10px 20px rgba(79, 140, 255, 0.33);
-  transition: left 0.35s var(--ease-out), width 0.35s var(--ease-out);
+  transition: left 0.28s var(--ease-snap), width 0.28s var(--ease-snap);
   pointer-events: none;
 }
 
@@ -993,7 +994,7 @@ body {
   padding: 8px 4px 7px;
   font-size: 10px;
   font-family: var(--font-body);
-  transition: color 0.22s ease, transform 0.14s ease;
+  transition: color 0.18s ease, transform 0.12s var(--ease-snap);
 }
 
 .mobile-tabbar .nav-item .icon {
@@ -1003,17 +1004,29 @@ body {
   align-items: center;
   justify-content: center;
   line-height: 1;
-  transition: transform 0.2s ease;
+  transition: transform 0.16s var(--ease-snap);
 }
 
 .mobile-tabbar .nav-item .icon svg {
   width: 16px;
   height: 16px;
   stroke: currentColor;
-  stroke-width: 1.85;
+  stroke-width: 1.95;
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.mobile-tabbar .nav-item::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 10px;
+  background: radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0) 68%);
+  opacity: 0;
+  transform: scale(0.86);
+  transition: opacity 0.18s ease, transform 0.18s var(--ease-snap);
+  pointer-events: none;
 }
 
 .mobile-tabbar .nav-item .label {
@@ -1026,7 +1039,12 @@ body {
 }
 
 .mobile-tabbar .nav-item:active {
-  transform: scale(0.94);
+  transform: scale(0.92);
+}
+
+.mobile-tabbar .nav-item:active::after {
+  opacity: 0.35;
+  transform: scale(1);
 }
 
 .mobile-tabbar .nav-item.active {
@@ -1034,7 +1052,7 @@ body {
 }
 
 .mobile-tabbar .nav-item.active .icon {
-  transform: translateY(-1px) scale(1.04);
+  transform: translateY(-1.5px) scale(1.06);
 }
 
 .no-script {
@@ -1742,7 +1760,7 @@ function revealCharts(scopeId) {
   const cards = scope.querySelectorAll('.chart-card');
   cards.forEach((card, idx) => {
     card.classList.remove('revealed');
-    window.setTimeout(() => card.classList.add('revealed'), 20 + Math.min(idx * 75, 260));
+    window.setTimeout(() => card.classList.add('revealed'), 16 + Math.min(idx * 58, 190));
   });
 }
 
@@ -1752,7 +1770,7 @@ function revealDashboardSections() {
   const blocks = scope.querySelectorAll('.dash-stagger-item');
   blocks.forEach((block, idx) => {
     block.classList.remove('revealed');
-    window.setTimeout(() => block.classList.add('revealed'), 30 + Math.min(idx * 65, 390));
+    window.setTimeout(() => block.classList.add('revealed'), 22 + Math.min(idx * 48, 280));
   });
 }
 
